@@ -49,14 +49,13 @@ namespace
 /**
  * \brief Name for ROS logging in the 'init' context.
  */
-constexpr char ROS_LOG_INIT[]{"init"};
-}
+constexpr char ROS_LOG_INIT[]{ "init" };
+}  // namespace
 
 namespace abb
 {
 namespace robot
 {
-
 /***********************************************************************************************************************
  * Struct definitions: RWSServiceProvider::ParameterHandler
  */
@@ -65,14 +64,12 @@ namespace robot
  * Primary methods
  */
 
-RWSServiceProvider::ParameterHandler::ParameterHandler(ros::NodeHandle& nh)
-:
-robot_port{0}
+RWSServiceProvider::ParameterHandler::ParameterHandler(ros::NodeHandle& nh) : robot_port{ 0 }
 {
   ROS_DEBUG_STREAM_NAMED(ROS_LOG_INIT, "Get ROS parameters (namespace '" << nh.getNamespace() << "')");
 
   // IP address.
-  utilities::getParameter(nh, "robot_ip", robot_ip, std::string{"127.0.0.1"});
+  utilities::getParameter(nh, "robot_ip", robot_ip, std::string{ "127.0.0.1" });
   utilities::verifyIPAddress(robot_ip);
 
   // Port number.
@@ -95,21 +92,17 @@ robot_port{0}
  */
 
 RWSServiceProvider::RWSServiceProvider(ros::NodeHandle& nh_params, ros::NodeHandle& nh_srvs)
-:
-parameters_{nh_params},
-rws_manager_{parameters_.robot_ip,
-             static_cast<unsigned short>(parameters_.robot_port),
-             rws::SystemConstants::General::DEFAULT_USERNAME,
-             rws::SystemConstants::General::DEFAULT_PASSWORD}
+  : parameters_{ nh_params }
+  , rws_manager_{ parameters_.robot_ip, static_cast<unsigned short>(parameters_.robot_port),
+                  rws::v1_0::DEFAULT_USERNAME, rws::v1_0::DEFAULT_PASSWORD }
 {
   ROS_INFO_NAMED(ROS_LOG_INIT, "Initializing...");
 
   //--------------------------------------------------------
   // Connect to the robot controller
   //--------------------------------------------------------
-  robot_controller_description_ = utilities::establishRWSConnection(rws_manager_,
-                                                                    parameters_.robot_nickname,
-                                                                    parameters_.no_connection_timeout);
+  robot_controller_description_ =
+      utilities::establishRWSConnection(rws_manager_, parameters_.robot_nickname, parameters_.no_connection_timeout);
   ROS_DEBUG_STREAM_NAMED(ROS_LOG_INIT, "Robot controller description:\n" << summaryText(robot_controller_description_));
 
   utilities::verifyRobotWareVersion(robot_controller_description_.header().robot_ware_version());
@@ -119,91 +112,91 @@ rws_manager_{parameters_.robot_ip,
   //--------------------------------------------------------
   system_states_subscriber_ = nh_srvs.subscribe("system_states", 1, &RWSServiceProvider::systemStatesCallback, this);
 
-  ros::NodeHandle nh_sm_addin{nh_srvs, "sm_addin"};
-  if(utilities::verifyStateMachineAddInPresence(robot_controller_description_.system_indicators()))
+  ros::NodeHandle nh_sm_addin{ nh_srvs, "sm_addin" };
+  if (utilities::verifyStateMachineAddInPresence(robot_controller_description_.system_indicators()))
   {
-    sm_runtime_states_subscriber_ = nh_sm_addin.subscribe("runtime_states", 1,
-                                                          &RWSServiceProvider::smAddInRuntimeStatesCallback, this);
+    sm_runtime_states_subscriber_ =
+        nh_sm_addin.subscribe("runtime_states", 1, &RWSServiceProvider::smAddInRuntimeStatesCallback, this);
   }
 
   //--------------------------------------------------------
   // Advertise auxiliary services
   //--------------------------------------------------------
-  services_.push_back(nh_srvs.advertiseService("get_robot_controller_description",
-                                               &RWSServiceProvider::getRCDescription, this));
+  services_.push_back(
+      nh_srvs.advertiseService("get_robot_controller_description", &RWSServiceProvider::getRCDescription, this));
 
   //--------------------------------------------------------
   // Advertise core services
   //--------------------------------------------------------
   ROS_DEBUG_STREAM_NAMED(ROS_LOG_INIT, "Adding basic services");
   services_.push_back(nh_srvs.advertiseService("get_file_contents", &RWSServiceProvider::getFileContents, this));
-  services_.push_back(nh_srvs.advertiseService("get_io_signal",     &RWSServiceProvider::getIOSignal,     this));
-  services_.push_back(nh_srvs.advertiseService("get_rapid_bool",    &RWSServiceProvider::getRAPIDBool,    this));
-  services_.push_back(nh_srvs.advertiseService("get_rapid_dnum",    &RWSServiceProvider::getRAPIDDnum,    this));
-  services_.push_back(nh_srvs.advertiseService("get_rapid_num",     &RWSServiceProvider::getRAPIDNum,     this));
-  services_.push_back(nh_srvs.advertiseService("get_rapid_string",  &RWSServiceProvider::getRAPIDString,  this));
-  services_.push_back(nh_srvs.advertiseService("get_rapid_symbol",  &RWSServiceProvider::getRAPIDSymbol,  this));
-  services_.push_back(nh_srvs.advertiseService("get_speed_ratio",   &RWSServiceProvider::getSpeedRatio,   this));
-  services_.push_back(nh_srvs.advertiseService("pp_to_main",        &RWSServiceProvider::ppToMain,        this));
+  services_.push_back(nh_srvs.advertiseService("get_io_signal", &RWSServiceProvider::getIOSignal, this));
+  services_.push_back(nh_srvs.advertiseService("get_rapid_bool", &RWSServiceProvider::getRAPIDBool, this));
+  services_.push_back(nh_srvs.advertiseService("get_rapid_dnum", &RWSServiceProvider::getRAPIDDnum, this));
+  services_.push_back(nh_srvs.advertiseService("get_rapid_num", &RWSServiceProvider::getRAPIDNum, this));
+  services_.push_back(nh_srvs.advertiseService("get_rapid_string", &RWSServiceProvider::getRAPIDString, this));
+  services_.push_back(nh_srvs.advertiseService("get_rapid_symbol", &RWSServiceProvider::getRAPIDSymbol, this));
+  services_.push_back(nh_srvs.advertiseService("get_speed_ratio", &RWSServiceProvider::getSpeedRatio, this));
+  services_.push_back(nh_srvs.advertiseService("pp_to_main", &RWSServiceProvider::ppToMain, this));
   services_.push_back(nh_srvs.advertiseService("set_file_contents", &RWSServiceProvider::setFileContents, this));
-  services_.push_back(nh_srvs.advertiseService("set_io_signal",     &RWSServiceProvider::setIOSignal,     this));
-  services_.push_back(nh_srvs.advertiseService("set_motors_off",    &RWSServiceProvider::setMotorsOff,    this));
-  services_.push_back(nh_srvs.advertiseService("set_motors_on",     &RWSServiceProvider::setMotorsOn,     this));
-  services_.push_back(nh_srvs.advertiseService("set_rapid_bool",    &RWSServiceProvider::setRAPIDBool,    this));
-  services_.push_back(nh_srvs.advertiseService("set_rapid_dnum",    &RWSServiceProvider::setRAPIDDnum,    this));
-  services_.push_back(nh_srvs.advertiseService("set_rapid_num",     &RWSServiceProvider::setRAPIDNum,     this));
-  services_.push_back(nh_srvs.advertiseService("set_rapid_string",  &RWSServiceProvider::setRAPIDString,  this));
-  services_.push_back(nh_srvs.advertiseService("set_rapid_symbol",  &RWSServiceProvider::setRAPIDSymbol,  this));
-  services_.push_back(nh_srvs.advertiseService("set_speed_ratio",   &RWSServiceProvider::setSpeedRatio,   this));
-  services_.push_back(nh_srvs.advertiseService("start_rapid",       &RWSServiceProvider::startRAPID,      this));
-  services_.push_back(nh_srvs.advertiseService("stop_rapid",        &RWSServiceProvider::stopRAPID,       this));
+  services_.push_back(nh_srvs.advertiseService("set_io_signal", &RWSServiceProvider::setIOSignal, this));
+  services_.push_back(nh_srvs.advertiseService("set_motors_off", &RWSServiceProvider::setMotorsOff, this));
+  services_.push_back(nh_srvs.advertiseService("set_motors_on", &RWSServiceProvider::setMotorsOn, this));
+  services_.push_back(nh_srvs.advertiseService("set_rapid_bool", &RWSServiceProvider::setRAPIDBool, this));
+  services_.push_back(nh_srvs.advertiseService("set_rapid_dnum", &RWSServiceProvider::setRAPIDDnum, this));
+  services_.push_back(nh_srvs.advertiseService("set_rapid_num", &RWSServiceProvider::setRAPIDNum, this));
+  services_.push_back(nh_srvs.advertiseService("set_rapid_string", &RWSServiceProvider::setRAPIDString, this));
+  services_.push_back(nh_srvs.advertiseService("set_rapid_symbol", &RWSServiceProvider::setRAPIDSymbol, this));
+  services_.push_back(nh_srvs.advertiseService("set_speed_ratio", &RWSServiceProvider::setSpeedRatio, this));
+  services_.push_back(nh_srvs.advertiseService("start_rapid", &RWSServiceProvider::startRAPID, this));
+  services_.push_back(nh_srvs.advertiseService("stop_rapid", &RWSServiceProvider::stopRAPID, this));
 
   //--------------------------------------------------------
   // Advertise StateMachine Add-In services
   //--------------------------------------------------------
-  const auto& system_indicators{robot_controller_description_.system_indicators()};
+  const auto& system_indicators{ robot_controller_description_.system_indicators() };
 
-  if(system_indicators.addins().has_state_machine_1_0())
+  if (system_indicators.addins().has_state_machine_1_0())
   {
     ROS_DEBUG_STREAM_NAMED(ROS_LOG_INIT, "StateMachine Add-In 1.0 detected, adding additional services");
 
     services_.push_back(nh_sm_addin.advertiseService("run_rapid_routine", &RWSServiceProvider::runRAPIDRoutine, this));
     services_.push_back(nh_sm_addin.advertiseService("set_rapid_routine", &RWSServiceProvider::setRAPIDRoutine, this));
 
-    if(system_indicators.options().egm())
+    if (system_indicators.options().egm())
     {
       services_.push_back(nh_sm_addin.advertiseService("get_egm_settings", &RWSServiceProvider::getEGMSettings, this));
       services_.push_back(nh_sm_addin.advertiseService("set_egm_settings", &RWSServiceProvider::setEGMSettings, this));
-      services_.push_back(nh_sm_addin.advertiseService("start_egm_joint",  &RWSServiceProvider::startEGMJoint,  this));
-      services_.push_back(nh_sm_addin.advertiseService("start_egm_pose",   &RWSServiceProvider::startEGMPose,   this));
-      services_.push_back(nh_sm_addin.advertiseService("stop_egm",         &RWSServiceProvider::stopEGM,        this));
+      services_.push_back(nh_sm_addin.advertiseService("start_egm_joint", &RWSServiceProvider::startEGMJoint, this));
+      services_.push_back(nh_sm_addin.advertiseService("start_egm_pose", &RWSServiceProvider::startEGMPose, this));
+      services_.push_back(nh_sm_addin.advertiseService("stop_egm", &RWSServiceProvider::stopEGM, this));
     }
 
-    if(system_indicators.addins().smart_gripper())
+    if (system_indicators.addins().smart_gripper())
     {
       services_.push_back(nh_sm_addin.advertiseService("run_sg_routine", &RWSServiceProvider::runSGRoutine, this));
       services_.push_back(nh_sm_addin.advertiseService("set_sg_command", &RWSServiceProvider::setSGCommand, this));
     }
   }
-  else if(system_indicators.addins().has_state_machine_1_1())
+  else if (system_indicators.addins().has_state_machine_1_1())
   {
     ROS_DEBUG_STREAM_NAMED(ROS_LOG_INIT, "StateMachine Add-In 1.1 detected, adding additional services");
 
     services_.push_back(nh_sm_addin.advertiseService("run_rapid_routine", &RWSServiceProvider::runRAPIDRoutine, this));
     services_.push_back(nh_sm_addin.advertiseService("set_rapid_routine", &RWSServiceProvider::setRAPIDRoutine, this));
 
-    if(system_indicators.options().egm())
+    if (system_indicators.options().egm())
     {
       services_.push_back(nh_sm_addin.advertiseService("get_egm_settings", &RWSServiceProvider::getEGMSettings, this));
       services_.push_back(nh_sm_addin.advertiseService("set_egm_settings", &RWSServiceProvider::setEGMSettings, this));
-      services_.push_back(nh_sm_addin.advertiseService("start_egm_joint",  &RWSServiceProvider::startEGMJoint,  this));
-      services_.push_back(nh_sm_addin.advertiseService("start_egm_pose",   &RWSServiceProvider::startEGMPose,   this));
+      services_.push_back(nh_sm_addin.advertiseService("start_egm_joint", &RWSServiceProvider::startEGMJoint, this));
+      services_.push_back(nh_sm_addin.advertiseService("start_egm_pose", &RWSServiceProvider::startEGMPose, this));
       services_.push_back(nh_sm_addin.advertiseService("start_egm_stream", &RWSServiceProvider::startEGMStream, this));
-      services_.push_back(nh_sm_addin.advertiseService("stop_egm",         &RWSServiceProvider::stopEGM,        this));
-      services_.push_back(nh_sm_addin.advertiseService("stop_egm_stream",  &RWSServiceProvider::stopEGMStream,  this));
+      services_.push_back(nh_sm_addin.advertiseService("stop_egm", &RWSServiceProvider::stopEGM, this));
+      services_.push_back(nh_sm_addin.advertiseService("stop_egm_stream", &RWSServiceProvider::stopEGMStream, this));
     }
 
-    if(system_indicators.addins().smart_gripper())
+    if (system_indicators.addins().smart_gripper())
     {
       services_.push_back(nh_sm_addin.advertiseService("run_sg_routine", &RWSServiceProvider::runSGRoutine, this));
       services_.push_back(nh_sm_addin.advertiseService("set_sg_command", &RWSServiceProvider::setSGCommand, this));
@@ -243,7 +236,7 @@ bool RWSServiceProvider::getRCDescription(GetRCDescription::Request&, GetRCDescr
 
 bool RWSServiceProvider::verifyAutoMode(uint16_t& result_code, std::string& message)
 {
-  if(!system_state_.auto_mode)
+  if (!system_state_.auto_mode)
   {
     message = abb_robot_msgs::ServiceResponses::NOT_IN_AUTO_MODE;
     result_code = abb_robot_msgs::ServiceResponses::RC_NOT_IN_AUTO_MODE;
@@ -253,9 +246,10 @@ bool RWSServiceProvider::verifyAutoMode(uint16_t& result_code, std::string& mess
   return true;
 }
 
-bool RWSServiceProvider::verifyArgumentFilename(const std::string& filename, uint16_t& result_code, std::string& message)
+bool RWSServiceProvider::verifyArgumentFilename(const std::string& filename, uint16_t& result_code,
+                                                std::string& message)
 {
-  if(filename.empty())
+  if (filename.empty())
   {
     message = abb_robot_msgs::ServiceResponses::EMPTY_FILENAME;
     result_code = abb_robot_msgs::ServiceResponses::RC_EMPTY_FILENAME;
@@ -268,21 +262,21 @@ bool RWSServiceProvider::verifyArgumentFilename(const std::string& filename, uin
 bool RWSServiceProvider::verifyArgumentRAPIDSymbolPath(const abb_robot_msgs::RAPIDSymbolPath& path,
                                                        uint16_t& result_code, std::string& message)
 {
-  if(path.task.empty())
+  if (path.task.empty())
   {
     message = abb_robot_msgs::ServiceResponses::EMPTY_RAPID_TASK_NAME;
     result_code = abb_robot_msgs::ServiceResponses::RC_EMPTY_RAPID_TASK_NAME;
     return false;
   }
 
-  if(path.module.empty())
+  if (path.module.empty())
   {
     message = abb_robot_msgs::ServiceResponses::EMPTY_RAPID_MODULE_NAME;
     result_code = abb_robot_msgs::ServiceResponses::RC_EMPTY_RAPID_MODULE_NAME;
     return false;
   }
 
-  if(path.symbol.empty())
+  if (path.symbol.empty())
   {
     message = abb_robot_msgs::ServiceResponses::EMPTY_RAPID_SYMBOL_NAME;
     result_code = abb_robot_msgs::ServiceResponses::RC_EMPTY_RAPID_SYMBOL_NAME;
@@ -294,7 +288,7 @@ bool RWSServiceProvider::verifyArgumentRAPIDSymbolPath(const abb_robot_msgs::RAP
 
 bool RWSServiceProvider::verifyArgumentRAPIDTask(const std::string& task, uint16_t& result_code, std::string& message)
 {
-  if(task.empty())
+  if (task.empty())
   {
     message = abb_robot_msgs::ServiceResponses::EMPTY_RAPID_TASK_NAME;
     result_code = abb_robot_msgs::ServiceResponses::RC_EMPTY_RAPID_TASK_NAME;
@@ -306,7 +300,7 @@ bool RWSServiceProvider::verifyArgumentRAPIDTask(const std::string& task, uint16
 
 bool RWSServiceProvider::verifyArgumentSignal(const std::string& signal, uint16_t& result_code, std::string& message)
 {
-  if(signal.empty())
+  if (signal.empty())
   {
     message = abb_robot_msgs::ServiceResponses::EMPTY_SIGNAL_NAME;
     result_code = abb_robot_msgs::ServiceResponses::RC_EMPTY_SIGNAL_NAME;
@@ -318,7 +312,7 @@ bool RWSServiceProvider::verifyArgumentSignal(const std::string& signal, uint16_
 
 bool RWSServiceProvider::verifyMotorsOff(uint16_t& result_code, std::string& message)
 {
-  if(system_state_.motors_on)
+  if (system_state_.motors_on)
   {
     message = abb_robot_msgs::ServiceResponses::MOTORS_ARE_ON;
     result_code = abb_robot_msgs::ServiceResponses::RC_MOTORS_ARE_ON;
@@ -330,7 +324,7 @@ bool RWSServiceProvider::verifyMotorsOff(uint16_t& result_code, std::string& mes
 
 bool RWSServiceProvider::verifyMotorsOn(uint16_t& result_code, std::string& message)
 {
-  if(!system_state_.motors_on)
+  if (!system_state_.motors_on)
   {
     message = abb_robot_msgs::ServiceResponses::MOTORS_ARE_OFF;
     result_code = abb_robot_msgs::ServiceResponses::RC_MOTORS_ARE_OFF;
@@ -342,7 +336,7 @@ bool RWSServiceProvider::verifyMotorsOn(uint16_t& result_code, std::string& mess
 
 bool RWSServiceProvider::verifyRAPIDRunning(uint16_t& result_code, std::string& message)
 {
-  if(!system_state_.rapid_running)
+  if (!system_state_.rapid_running)
   {
     message = abb_robot_msgs::ServiceResponses::RAPID_NOT_RUNNING;
     result_code = abb_robot_msgs::ServiceResponses::RC_RAPID_NOT_RUNNING;
@@ -354,7 +348,7 @@ bool RWSServiceProvider::verifyRAPIDRunning(uint16_t& result_code, std::string& 
 
 bool RWSServiceProvider::verifyRAPIDStopped(uint16_t& result_code, std::string& message)
 {
-  if(system_state_.rapid_running)
+  if (system_state_.rapid_running)
   {
     message = abb_robot_msgs::ServiceResponses::RAPID_NOT_STOPPED;
     result_code = abb_robot_msgs::ServiceResponses::RC_RAPID_NOT_STOPPED;
@@ -366,7 +360,7 @@ bool RWSServiceProvider::verifyRAPIDStopped(uint16_t& result_code, std::string& 
 
 bool RWSServiceProvider::verifySMAddInRuntimeStates(uint16_t& result_code, std::string& message)
 {
-  if(sm_addin_runtime_state_.state_machines.empty())
+  if (sm_addin_runtime_state_.state_machines.empty())
   {
     message = abb_robot_msgs::ServiceResponses::SM_RUNTIME_STATES_MISSING;
     result_code = abb_robot_msgs::ServiceResponses::RC_SM_RUNTIME_STATES_MISSING;
@@ -378,11 +372,10 @@ bool RWSServiceProvider::verifySMAddInRuntimeStates(uint16_t& result_code, std::
 
 bool RWSServiceProvider::verifySMAddInTaskExist(const std::string& task, uint16_t& result_code, std::string& message)
 {
-  auto it{std::find_if(sm_addin_runtime_state_.state_machines.begin(),
-                       sm_addin_runtime_state_.state_machines.end(),
-                       [&](const auto& sm){return sm.rapid_task == task;})};
+  auto it{ std::find_if(sm_addin_runtime_state_.state_machines.begin(), sm_addin_runtime_state_.state_machines.end(),
+                        [&](const auto& sm) { return sm.rapid_task == task; }) };
 
-  if(it == sm_addin_runtime_state_.state_machines.end())
+  if (it == sm_addin_runtime_state_.state_machines.end())
   {
     message = abb_robot_msgs::ServiceResponses::SM_UNKNOWN_RAPID_TASK;
     result_code = abb_robot_msgs::ServiceResponses::RC_SM_UNKNOWN_RAPID_TASK;
@@ -392,16 +385,17 @@ bool RWSServiceProvider::verifySMAddInTaskExist(const std::string& task, uint16_
   return true;
 }
 
-bool RWSServiceProvider::verifySMAddInTaskInitialized(const std::string& task, uint16_t& result_code, std::string& message)
+bool RWSServiceProvider::verifySMAddInTaskInitialized(const std::string& task, uint16_t& result_code,
+                                                      std::string& message)
 {
-  if(!verifySMAddInTaskExist(task, result_code, message)) return false;
+  if (!verifySMAddInTaskExist(task, result_code, message))
+    return false;
 
-  auto it{std::find_if(sm_addin_runtime_state_.state_machines.begin(),
-                       sm_addin_runtime_state_.state_machines.end(),
-                       [&](const auto& sm){return sm.rapid_task == task;})};
+  auto it{ std::find_if(sm_addin_runtime_state_.state_machines.begin(), sm_addin_runtime_state_.state_machines.end(),
+                        [&](const auto& sm) { return sm.rapid_task == task; }) };
 
-  if(it->sm_state == abb_rapid_sm_addin_msgs::StateMachineState::SM_STATE_UNKNOWN ||
-     it->sm_state == abb_rapid_sm_addin_msgs::StateMachineState::SM_STATE_INITIALIZE)
+  if (it->sm_state == abb_rapid_sm_addin_msgs::StateMachineState::SM_STATE_UNKNOWN ||
+      it->sm_state == abb_rapid_sm_addin_msgs::StateMachineState::SM_STATE_INITIALIZE)
   {
     message = abb_robot_msgs::ServiceResponses::SM_UNINITIALIZED;
     result_code = abb_robot_msgs::ServiceResponses::RC_SM_UNINITIALIZED;
@@ -413,7 +407,7 @@ bool RWSServiceProvider::verifySMAddInTaskInitialized(const std::string& task, u
 
 bool RWSServiceProvider::verifyRWSManagerReady(uint16_t& result_code, std::string& message)
 {
-  if(!rws_manager_.isInterfaceReady())
+  if (!rws_manager_.isInterfaceReady())
   {
     message = abb_robot_msgs::ServiceResponses::SERVER_IS_BUSY;
     result_code = abb_robot_msgs::ServiceResponses::RC_SERVER_IS_BUSY;
@@ -423,5 +417,5 @@ bool RWSServiceProvider::verifyRWSManagerReady(uint16_t& result_code, std::strin
   return true;
 }
 
-}
-}
+}  // namespace robot
+}  // namespace abb
