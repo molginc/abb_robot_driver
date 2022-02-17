@@ -46,8 +46,8 @@ namespace
 /**
  * \brief Name for ROS logging in the 'verify' context.
  */
-constexpr char ROS_LOG_VERIFY[]{"verify"};
-}
+constexpr char ROS_LOG_VERIFY[]{ "verify" };
+}  // namespace
 
 namespace abb
 {
@@ -55,7 +55,6 @@ namespace robot
 {
 namespace utilities
 {
-
 /***********************************************************************************************************************
  * Utility function definitions
  */
@@ -63,52 +62,49 @@ namespace utilities
 void verifyIPAddress(const std::string& ip_address)
 {
   Poco::Net::IPAddress poco_ip_address{};
-  if(!Poco::Net::IPAddress::tryParse(ip_address, poco_ip_address))
+  if (!Poco::Net::IPAddress::tryParse(ip_address, poco_ip_address))
   {
-    auto error_message{"Invalid IP address '" + ip_address + "' provided"};
+    auto error_message{ "Invalid IP address '" + ip_address + "' provided" };
     ROS_FATAL_STREAM_NAMED(ROS_LOG_VERIFY, error_message);
-    throw std::runtime_error{error_message};
+    throw std::runtime_error{ error_message };
   }
 }
 
 void verifyPortNumber(const int port_number)
 {
-  if(port_number < 0 || port_number > std::numeric_limits<unsigned short>::max())
+  if (port_number < 0 || port_number > std::numeric_limits<unsigned short>::max())
   {
-    auto error_message{"Invalid port number '" + std::to_string(port_number) + "' provided"};
+    auto error_message{ "Invalid port number '" + std::to_string(port_number) + "' provided" };
     ROS_FATAL_STREAM_NAMED(ROS_LOG_VERIFY, error_message);
-    throw std::runtime_error{error_message};
+    throw std::runtime_error{ error_message };
   }
 }
 
 void verifyRate(const double rate)
 {
-  if(rate <= 0.0)
+  if (rate <= 0.0)
   {
-    auto error_message{"Invalid rate [Hz] '" + std::to_string(rate) + "' provided"};
+    auto error_message{ "Invalid rate [Hz] '" + std::to_string(rate) + "' provided" };
     ROS_FATAL_STREAM_NAMED(ROS_LOG_VERIFY, error_message);
-    throw std::runtime_error{error_message};
+    throw std::runtime_error{ error_message };
   }
 }
 
 void verifyRobotWareVersion(const RobotWareVersion& rw_version)
 {
-  if(rw_version.major_number() == 6 &&
-     rw_version.minor_number() < 7 &&
-     rw_version.patch_number() < 1)
+  if (rw_version.major_number() < 7 && rw_version.minor_number() < 3)
   {
-    auto error_message{"Unsupported RobotWare version (" + rw_version.name() + ", need at least 6.07.01)"};
+    auto error_message{ "Unsupported RobotWare version (" + rw_version.name() + ", need at least 7.3.0)" };
     ROS_FATAL_STREAM_NAMED(ROS_LOG_VERIFY, error_message);
-    throw std::runtime_error{error_message};
+    throw std::runtime_error{ error_message };
   }
 }
 
 bool verifyStateMachineAddInPresence(const SystemIndicators& system_indicators)
 {
-  return system_indicators.addins().state_machine_1_0() ||
-         system_indicators.addins().state_machine_1_1();
+  return system_indicators.addins().state_machine_1_0() || system_indicators.addins().state_machine_1_1();
 }
 
-}
-}
-}
+}  // namespace utilities
+}  // namespace robot
+}  // namespace abb

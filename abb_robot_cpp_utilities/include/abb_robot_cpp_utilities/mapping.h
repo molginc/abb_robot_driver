@@ -48,39 +48,38 @@
 
 namespace abb
 {
-    namespace robot
-    {
-        namespace utilities
-        {
-
-            /**
+namespace robot
+{
+namespace utilities
+{
+/**
  * \brief Maps RAPID task execution state to ROS representation.
  *
  * \param state to map.
  *
  * \return uint8_t containing the mapped state.
  */
-            uint8_t map(const rws::rw::RAPIDTaskExecutionState state);
+uint8_t map(const rws::rw::RAPIDTaskExecutionState state);
 
-            /**
+/**
  * \brief Maps RobotWare StateMachine Add-In state to ROS representation.
  *
  * \param state to map.
  *
  * \return uint8_t containing the mapped state.
  */
-            uint8_t mapStateMachineState(const rws::RAPIDNum &state);
+uint8_t mapStateMachineState(const rws::RAPIDNum& state);
 
-            /**
+/**
  * \brief Maps RobotWare StateMachine Add-In EGM action to ROS representation.
  *
  * \param action to map.
  *
  * \return uint8_t containing the mapped state.
  */
-            uint8_t mapStateMachineEGMAction(const rws::RAPIDNum &action);
+uint8_t mapStateMachineEGMAction(const rws::RAPIDNum& action);
 
-            /**
+/**
  * \brief Maps RobotWare StateMachine Add-In SmartGripper command to RWS representation.
  *
  * \param command to map.
@@ -89,162 +88,162 @@ namespace abb
  *
  * \throw std::runtime_error if the command is unknown.
  */
-            unsigned int mapStateMachineSGCommand(const unsigned int command);
+unsigned int mapStateMachineSGCommand(const unsigned int command);
 
-            /**
+/**
  * \brief Maps a RAPID 'pos' data type from RWS to ROS representation.
  *
  * \param rws_pos to map.
  *
  * \return abb_rapid_msgs::Pos containing the mapped data.
  */
-            abb_rapid_msgs::Pos map(const rws::Pos &rws_pos);
+abb_rapid_msgs::Pos map(const rws::Pos& rws_pos);
 
-            /**
+/**
  * \brief Maps a RAPID 'orient' data type from RWS to ROS representation.
  *
  * \param rws_orient to map.
  *
  * \return abb_rapid_msgs::Orient containing the mapped data.
  */
-            abb_rapid_msgs::Orient map(const rws::Orient &rws_orient);
+abb_rapid_msgs::Orient map(const rws::Orient& rws_orient);
 
-            /**
+/**
  * \brief Maps a RAPID 'pose' data type from RWS to ROS representation.
  *
  * \param rws_pose to map.
  *
  * \return abb_rapid_msgs::Pose containing the mapped data.
  */
-            abb_rapid_msgs::Pose map(const rws::Pose &rws_pose);
+abb_rapid_msgs::Pose map(const rws::Pose& rws_pose);
 
-            /**
+/**
  * \brief Maps a RAPID 'loaddata' data type from RWS to ROS representation.
  *
  * \param rws_loaddata to map.
  *
  * \return abb_rapid_msgs::LoadData containing the mapped data.
  */
-            abb_rapid_msgs::LoadData map(const rws::LoadData &rws_loaddata);
+abb_rapid_msgs::LoadData map(const rws::LoadData& rws_loaddata);
 
-            /**
+/**
  * \brief Maps a RAPID 'tooldata' data type from RWS to ROS representation.
  *
  * \param rws_tooldata to map.
  *
  * \return abb_rapid_msgs::ToolData containing the mapped data.
  */
-            abb_rapid_msgs::ToolData map(const rws::ToolData &rws_tooldata);
+abb_rapid_msgs::ToolData map(const rws::ToolData& rws_tooldata);
 
-            /**
+/**
  * \brief Maps a RAPID 'wobjdata' data type from RWS to ROS representation.
  *
  * \param rws_wobjdata to map.
  *
  * \return abb_rapid_msgs::WObjData containing the mapped data.
  */
-            abb_rapid_msgs::WObjData map(const rws::WObjData &rws_wobjdata);
+abb_rapid_msgs::WObjData map(const rws::WObjData& rws_wobjdata);
 
-            /**
+/**
  * \brief Maps a RobotWare StateMachine Add-In RAPID 'EGMSettings' data type from RWS to ROS representation.
  *
  * \param rws_egm_settings to map.
  *
  * \return abb_rapid_sm_addin_msgs::EGMSettings containing the mapped data.
  */
-            abb_rapid_sm_addin_msgs::EGMSettings map(const rws::RWSStateMachineInterface::EGMSettings &rws_egm_settings);
+abb_rapid_sm_addin_msgs::EGMSettings map(const rws::v2_0::RWSStateMachineInterface::EGMSettings& rws_egm_settings);
 
-            /**
+/**
  * \brief Maps a RAPID 'pos' data type from ROS to RWS representation.
  *
  * \param ros_pos to map.
  *
  * \return rws::Pos containing the mapped data.
  */
-            rws::Pos map(const abb_rapid_msgs::Pos &ros_pos);
+rws::Pos map(const abb_rapid_msgs::Pos& ros_pos);
 
-            /**
+/**
  * \brief Maps a RAPID 'orient' data type from ROS to RWS representation.
  *
  * \param ros_orient to map.
  *
  * \return rws::Orient containing the mapped data.
  */
-            rws::Orient map(const abb_rapid_msgs::Orient &ros_orient);
+rws::Orient map(const abb_rapid_msgs::Orient& ros_orient);
 
-            /**
+/**
  * \brief Maps a RAPID 'pose' data type from ROS to RWS representation.
  *
  * \param ros_pose to map.
  *
  * \return rws::Pose containing the mapped data.
  */
-            rws::Pose map(const abb_rapid_msgs::Pose &ros_pose);
+rws::Pose map(const abb_rapid_msgs::Pose& ros_pose);
 
-            /**
+/**
  * \brief Maps a RAPID 'loaddata' data type from ROS to RWS representation.
  *
  * \param ros_loaddata to map.
  *
  * \return rws::LoadData containing the mapped data.
  */
-            rws::LoadData map(const abb_rapid_msgs::LoadData &ros_loaddata);
+rws::LoadData map(const abb_rapid_msgs::LoadData& ros_loaddata);
 
-            /**
+/**
  * \brief Maps a RAPID 'tooldata' data type from ROS to RWS representation.
  *
  * \param ros_tooldata to map.
  *
  * \return rws::ToolData containing the mapped data.
  */
-            rws::ToolData map(const abb_rapid_msgs::ToolData &ros_tooldata);
+rws::ToolData map(const abb_rapid_msgs::ToolData& ros_tooldata);
 
-            /**
+/**
  * \brief Maps a RAPID 'wobjdata' data type from ROS to RWS representation.
  *
  * \param ros_wobjdata to map.
  *
  * \return rws::WObjData containing the mapped data.
  */
-            rws::WObjData map(const abb_rapid_msgs::WObjData &ros_wobjdata);
+rws::WObjData map(const abb_rapid_msgs::WObjData& ros_wobjdata);
 
-            /**
+/**
  * \brief Maps a RobotWare StateMachine Add-In RAPID 'EGMSettings' data type from ROS to RWS representation.
  *
  * \param ros_egm_settings to map.
  *
- * \return rws::RWSStateMachineInterface::EGMSettings containing the mapped data.
+ * \return rws::v2_0::RWSStateMachineInterface::EGMSettings containing the mapped data.
  */
-            rws::RWSStateMachineInterface::EGMSettings map(const abb_rapid_sm_addin_msgs::EGMSettings &ros_egm_settings);
+rws::v2_0::RWSStateMachineInterface::EGMSettings map(const abb_rapid_sm_addin_msgs::EGMSettings& ros_egm_settings);
 
-            /**
+/**
  * \brief Maps EGM state to ROS representation.
  *
  * \param state to map.
  *
  * \return uint8_t containing the mapped state.
  */
-            uint8_t map(const egm::wrapper::Status::EGMState state);
+uint8_t map(const egm::wrapper::Status::EGMState state);
 
-            /**
+/**
  * \brief Maps motor state to ROS representation.
  *
  * \param state to map.
  *
  * \return uint8_t containing the mapped state.
  */
-            uint8_t map(const egm::wrapper::Status::MotorState state);
+uint8_t map(const egm::wrapper::Status::MotorState state);
 
-            /**
+/**
  * \brief Maps RAPID execution state to ROS representation.
  *
  * \param state to map.
  *
  * \return uint8_t containing the mapped state.
  */
-            uint8_t map(const egm::wrapper::Status::RAPIDExecutionState rapid_execution_state);
+uint8_t map(const egm::wrapper::Status::RAPIDExecutionState rapid_execution_state);
 
-            /**
+/**
  * \brief Maps a vector to a string (e.g. for logging).
  *
  * \param vector to map.
@@ -253,11 +252,11 @@ namespace abb
  *
  * \throw std::runtime if the mapping failed.
  */
-            template <typename type>
-            std::string mapVectorToString(const std::vector<type> &vector);
+template <typename type>
+std::string mapVectorToString(const std::vector<type>& vector);
 
-        }
-    }
-}
+}  // namespace utilities
+}  // namespace robot
+}  // namespace abb
 
 #endif
