@@ -5,13 +5,13 @@ repositories:
    version: e0b8c3b0
   abb_librws:
    type: git
-   url: https://github.com/NoMagicAi/abb_librws.git
-   version: rws2_port
+   url: https://github.com/Amin173/abb_librws.git
+   version: rws2_port_formated
   abb_egm_rws_managers:
    type: git
-   url: https://github.com/ros-industrial/abb_egm_rws_managers.git
-   version: 7d69d3dd
+   url: https://github.com/Amin173/abb_egm_rws_managers.git
+   version: develop
   abb_robot_driver:
    type: git
-   url: https://github.com/herrvonregen/abb_robot_driver.git
-   version: master
+   url: https://github.com/Amin173/abb_robot_driver.git
+   version: add_omnicore_support
