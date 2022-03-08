@@ -30,7 +30,7 @@ Please see the [config](config) folder for configuration examples for a few diff
 
 ### Requirements
 
-- `RobotWare` version `6.07.01` or higher (less than `7.0`).
+- `RobotWare` version `7.0` or higher.
 
 Please see the underlying [abb_libegm](https://github.com/ros-industrial/abb_libegm) and [abb_librws](https://github.com/ros-industrial/abb_librws) packages for more details.
 
