@@ -25,7 +25,7 @@ Some of the exposed ROS services include:
   - Getting/setting of file contents (*of files in the robot controller's home directory*).
   - Getting/setting speed ratio for `RAPID` motions.
   - Getting/setting of IO-signals.
-- `RobotWare` [StateMachine Add-In](https://robotapps.robotstudio.com/#/viewApp/c163de01-792e-4892-a290-37dbe050b6e1) interaction (*only exposed if the `StateMachine Add-In` is present in the system*):
+- `RobotWare` [StateMachine Add-In](https://github.com/Amin173/statemachine_add_in_rw7) interaction (*only exposed if the `StateMachine Add-In` is present in the system*):
   - `RAPID` interaction:
     - Setting custom `RAPID` routines to run (*the routines needs to be predefined in the `RAPID` code*).
     - Signaling that the custom `RAPID` routines should be run.
@@ -41,9 +41,9 @@ Please see the [rws_service_provider.launch](launch/rws_service_provider.launch)
 
 ### Requirements
 
-- `RobotWare` version `6.07.01` or higher (less than `7.0`).
+- `RobotWare` version `7.0` or higher.
 
-Please see the underlying [abb_libegm](https://github.com/ros-industrial/abb_libegm) and [abb_librws](https://github.com/ros-industrial/abb_librws) packages for more details.
+Please see the underlying [abb_libegm](https://github.com/ros-industrial/abb_libegm) and [abb_librws](https://github.com/Amin173/abb_librws.git) packages for more details.
 
 ### Troubleshooting
 
