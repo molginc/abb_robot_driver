@@ -40,8 +40,10 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
 1. Start 3 terminals.
 2. **[Terminal 1]** Launch the example:
    ```
-   roslaunch abb_robot_bringup_examples ex1_rws_only.launch robot_ip:=<robot controller's IP address>
+   roslaunch abb_robot_bringup_examples ex1_rws_only.launch robot_ip:=<robot controller's IP address> robot_port:=<rws listening port number>
    ```
+**   Default port number on the OmniCore controller was tested to be `443`.
+**   
 3. **[Terminal 2]** Use `rostopic` to, for example, list available topics and then listen for general robot controller states:
    ```
    rostopic list
@@ -75,7 +77,7 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
 1. Start 4 terminals.
 2. **[Terminal 1]** Launch the example:
    ```
-   roslaunch abb_robot_bringup_examples ex2_rws_and_egm_6axis_robot.launch robot_ip:=<robot controller's IP address>
+   roslaunch abb_robot_bringup_examples ex2_rws_and_egm_6axis_robot.launch robot_ip:=<robot controller's IP address> robot_port:=<rws listening port number>
    ```
 3. **[Terminal 2]** Use `rostopic` to listen for `EGM` channel states:
    ```
@@ -127,7 +129,7 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
 1. Start 4 terminals.
 2. **[Terminal 1]** Launch the example:
    ```
-   roslaunch abb_robot_bringup_examples ex3_rws_and_egm_yumi_robot.launch robot_ip:=<robot controller's IP address>
+   roslaunch abb_robot_bringup_examples ex3_rws_and_egm_yumi_robot.launch robot_ip:=<robot controller's IP address> robot_port:=<rws listening port number>
    ```
 3. **[Terminal 2]** Use `rostopic` to listen for `EGM` channel states:
    ```
