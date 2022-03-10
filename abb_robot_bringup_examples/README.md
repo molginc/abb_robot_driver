@@ -42,8 +42,8 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
    ```
    roslaunch abb_robot_bringup_examples ex1_rws_only.launch robot_ip:=<robot controller's IP address> robot_port:=<rws listening port number>
    ```
-**   Default port number on the OmniCore controller was tested to be `443`.
-**   
+   **Default port number on the OmniCore controller was tested to be `443`.**
+
 3. **[Terminal 2]** Use `rostopic` to, for example, list available topics and then listen for general robot controller states:
    ```
    rostopic list
