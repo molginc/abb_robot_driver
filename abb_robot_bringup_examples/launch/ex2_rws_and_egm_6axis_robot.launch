@@ -2,6 +2,7 @@
 <launch>
   <arg name="robot_ip" doc="The robot controller's IP address"/>
   <arg name="robot_port" doc="The robot controller's port number"/>
+  <arg name="robot_nickname" default="" doc="Arbitrary user nickname/identifier for the robot controller"/>
 
   <!-- Enable DEBUG output for all ABB nodes -->
   <arg name="debug" default="false"/>
@@ -15,12 +16,14 @@
   <include file="$(find abb_rws_state_publisher)/launch/rws_state_publisher.launch">
     <arg name="robot_port" value="$(arg robot_port)"/>
     <arg name="robot_ip" value="$(arg robot_ip)"/>
+    <arg name="robot_nickname" value="$(arg robot_nickname)"/>
   </include>
 
   <!-- RWS service provider (i.a. starting/stopping the robot controller's RAPID execution) -->
   <include file="$(find abb_rws_service_provider)/launch/rws_service_provider.launch">
     <arg name="robot_ip" value="$(arg robot_ip)"/>
     <arg name="robot_port" value="$(arg robot_port)"/>
+    <arg name="robot_nickname" value="$(arg robot_nickname)"/>
   </include>
 
   <!-- ============================================================================================================= -->
@@ -44,6 +47,7 @@
 
     <!-- Two 'ros_control' controller spawners (stopped for the controller that command motions) -->
     <node pkg="controller_manager" type="spawner" name="started" args="egm_state_controller joint_state_controller"/>
-    <node pkg="controller_manager" type="spawner" name="stopped" args="--stopped joint_group_velocity_controller"/>
+    <node pkg="controller_manager" type="spawner" name="stopped" args="--stopped joint_position_trajectory_controller"/>
+    
   </group>
 </launch>
