@@ -73,12 +73,15 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
 - The `ros_control` controller, which command motions, is only allowed to start if an `EGM` session is active.
 
 #### Steps
+1. Install the moveit_config and support packages from abb_experimnetal - see [this thread](https://github.com/ros-industrial/abb_robot_driver/issues/11) on how to updated these packages for usign abb_robot_driver instead of the old abb_driver.
 
-1. Start 4 terminals.
-2. **[Terminal 1]** Launch the example:
+2. Start 4 terminals.
+
+3. **[Terminal 1]** Launch the example:
    ```
-   roslaunch abb_robot_bringup_examples ex2_rws_and_egm_6axis_robot.launch robot_ip:=<robot controller's IP address> robot_port:=<rws listening port number>
+   roslaunch crb1100_580_moveit_config moveit_planning_execution.launch robot_ip:=<robot controller's IP address> robot_port:=<rws listening port number> sim:=false robot_nickname:<robot nickname for multi-robot setups>
    ```
+   
 3. **[Terminal 2]** Use `rostopic` to listen for `EGM` channel states:
    ```
    rostopic echo -c /egm/egm_states
@@ -92,16 +95,15 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
    ```
 5. **[Terminal 3]** Use `rosservice` to start the `ros_control` command controller (*requires a running `EGM` session*):
    ```
-   rosservice call /egm/controller_manager/switch_controller "start_controllers: [joint_group_velocity_controller]
+   rosservice call /egm/controller_manager/switch_controller "start_controllers: [joint_position_trajectory_controller]
    stop_controllers: ['']
    strictness: 1
    start_asap: false
    timeout: 0.0"
    ```
-6. **[Terminal 4]** Use `rostopic` to publish velocity commands for the sixth joint:
-   ```
-   rostopic pub /egm/joint_group_velocity_controller/command std_msgs/Float64MultiArray "data: [0,0,0,0,0,0.1]"
-   ```
+
+6. Send motion commands through MoveIt!
+
 7. **[Terminal 3]** Use `rosservice` to stop the `EGM` session:
    ```
    rosservice call /rws/sm_addin/stop_egm "{}"
