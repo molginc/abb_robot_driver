@@ -71,7 +71,7 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
 - The `ros_control` controller, which command motions, is only allowed to start if an `EGM` session is active.
 
 #### Steps
-1. Install the support and moveit_config packages -- see (this thread)[https://github.com/ros-industrial/abb_robot_driver/issues/11] for updating the moveit_config and support packages to use abb_robot_driver instead of the old abb_driver. 
+1. Install the support and moveit_config packages -- see [this thread](https://github.com/ros-industrial/abb_robot_driver/issues/11) for updating the moveit_config and support packages to use abb_robot_driver instead of the old abb_driver. 
 
 2. Start 4 terminals.
 
