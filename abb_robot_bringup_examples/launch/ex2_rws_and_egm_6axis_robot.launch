@@ -4,13 +4,12 @@
   <arg name="robot_port" doc="The robot controller's port number"/>
 
   <!-- Using an nickname/identifier for the robot controller is good practice -->
-  <arg name="robot_nickname" default="irb1100" doc="Nickname/identifier for the robot controller"/>
+  <arg name="robot_nickname" default="" doc="Nickname/identifier for the robot controller"/>
 
   <!-- Enable DEBUG output for all ABB nodes -->
   <arg name="debug" default="false"/>
   <env if="$(arg debug)" name="ROSCONSOLE_CONFIG_FILE" value="$(find abb_robot_bringup_examples)/config/rosconsole.conf"/>
 
-  
   <!-- Launching the driver components in their own namespace is good practice -->
   <group ns="$(arg robot_nickname)">
 
