@@ -8,7 +8,9 @@
   <arg name="debug" default="false"/>
   <env if="$(arg debug)" name="ROSCONSOLE_CONFIG_FILE" value="$(find abb_robot_bringup_examples)/config/rosconsole.conf"/>
 
-  <rosparam command="delete" param="/$(arg robot_nickname)" />
+  <group unless="$(eval arg('robot_nickname') == '')">
+    <rosparam command="delete" param="/$(arg robot_nickname)" />
+  </group>
 
   <group ns="$(arg robot_nickname)">
 
