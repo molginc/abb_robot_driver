@@ -12,18 +12,30 @@ joint_limits:
   crb1100_580_joint_1:
     has_velocity_limits: true
     max_velocity: 4.8869
+    has_acceleration_limits: true
+    max_acceleration: 50
   crb1100_580_joint_2:
     has_velocity_limits: true
     max_velocity: 4.8869
+    has_acceleration_limits: true
+    max_acceleration: 50
   crb1100_580_joint_3:
     has_velocity_limits: true
     max_velocity: 4.8869
+    has_acceleration_limits: true
+    max_acceleration: 50
   crb1100_580_joint_4:
     has_velocity_limits: true
     max_velocity: 4.8869
+    has_acceleration_limits: true
+    max_acceleration: 50
   crb1100_580_joint_5:
     has_velocity_limits: true
     max_velocity: 4.8869
+    has_acceleration_limits: true
+    max_acceleration: 50
   crb1100_580_joint_6:
     has_velocity_limits: true
     max_velocity: 4.8869
+    has_acceleration_limits: true
+    max_acceleration: 50
