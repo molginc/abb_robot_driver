@@ -43,6 +43,18 @@ joint_position_trajectory_controller:
   type: position_controllers/JointTrajectoryController
   joints: [crb15000_joint_1, crb15000_joint_2, crb15000_joint_3, crb15000_joint_4, crb15000_joint_5, crb15000_joint_6]
   constraints:
-    goal_time: 5                 # Override default
-    stopped_velocity_tolerance: 0.001 # Override default
-    stop_trajectory_duration: 0.0
+      goal_time: 10                 # Override default
+      stopped_velocity_tolerance: 0.1 # Override default
+      stop_trajectory_duration: 0.0
+      crb15000_joint_1:
+        goal: 0.015
+      crb15000_joint_2:
+        goal: 0.015
+      crb15000_joint_3:
+        goal: 0.015
+      crb15000_joint_4:
+        goal: 0.015
+      crb15000_joint_5:
+        goal: 0.015
+      crb15000_joint_6:
+        goal: 0.015
