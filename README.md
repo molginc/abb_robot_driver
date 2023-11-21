@@ -11,6 +11,13 @@
 **Please note that the included packages have not been productized, and that academia is the intended audience.**\
 **The packages are provided "as-is", and as such no more than limited support can be expected.**
 
+## MOLG Notes
+### Omnicore configuration
+- Robotware 7.7
+- In RobotStudio:
+- - Configuration->Communication->Firewall Manager: Enable all 'Network Services' on all networks.
+  - Configuration->Communication->UDP Unicast Device: Create a service with Name=`ROB_1` Type=`UDPUC` RemoteAddress=`[rosmaster IP]` RemotePortNumber=`[port configured for the given arm]` LocalPortNumber=0
+
 ## Overview
 
 ROS packages intended to ease interaction between ABB robot controllers and ROS-based systems, by providing *ready-to-run* ROS nodes.
