@@ -94,7 +94,7 @@ RWSServiceProvider::ParameterHandler::ParameterHandler(ros::NodeHandle& nh) : ro
 RWSServiceProvider::RWSServiceProvider(ros::NodeHandle& nh_params, ros::NodeHandle& nh_srvs)
   : parameters_{ nh_params }
   , rws_manager_{ parameters_.robot_ip, static_cast<unsigned short>(parameters_.robot_port),
-                  rws::v1_0::DEFAULT_USERNAME, rws::v1_0::DEFAULT_PASSWORD }
+                  rws::v2_0::DEFAULT_USERNAME, rws::v2_0::DEFAULT_PASSWORD }
 {
   ROS_INFO_NAMED(ROS_LOG_INIT, "Initializing...");
 
@@ -139,7 +139,8 @@ RWSServiceProvider::RWSServiceProvider(ros::NodeHandle& nh_params, ros::NodeHand
   services_.push_back(nh_srvs.advertiseService("get_speed_ratio", &RWSServiceProvider::getSpeedRatio, this));
   services_.push_back(nh_srvs.advertiseService("pp_to_main", &RWSServiceProvider::ppToMain, this));
   services_.push_back(nh_srvs.advertiseService("set_file_contents", &RWSServiceProvider::setFileContents, this));
-  services_.push_back(nh_srvs.advertiseService("set_io_signal", &RWSServiceProvider::setIOSignal, this));
+  services_.push_back(nh_srvs.advertiseService("set_io_signal", &RWSServiceProvider::setIOSignal,
+                                               this));  // FIXME: New Functions for different Signal Types
   services_.push_back(nh_srvs.advertiseService("set_motors_off", &RWSServiceProvider::setMotorsOff, this));
   services_.push_back(nh_srvs.advertiseService("set_motors_on", &RWSServiceProvider::setMotorsOn, this));
   services_.push_back(nh_srvs.advertiseService("set_rapid_bool", &RWSServiceProvider::setRAPIDBool, this));
@@ -178,30 +179,31 @@ RWSServiceProvider::RWSServiceProvider(ros::NodeHandle& nh_params, ros::NodeHand
       services_.push_back(nh_sm_addin.advertiseService("set_sg_command", &RWSServiceProvider::setSGCommand, this));
     }
   }
-  else if (system_indicators.addins().has_state_machine_1_1())
+  // FIXME: While there is no new version of the state machine the services are added netherless
+  // else if (system_indicators.addins().has_state_machine_1_1())
+  // {
+  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_INIT, "StateMachine Add-In 1.1 detected, adding additional services");
+
+  services_.push_back(nh_sm_addin.advertiseService("run_rapid_routine", &RWSServiceProvider::runRAPIDRoutine, this));
+  services_.push_back(nh_sm_addin.advertiseService("set_rapid_routine", &RWSServiceProvider::setRAPIDRoutine, this));
+
+  if (system_indicators.options().egm())
   {
-    ROS_DEBUG_STREAM_NAMED(ROS_LOG_INIT, "StateMachine Add-In 1.1 detected, adding additional services");
-
-    services_.push_back(nh_sm_addin.advertiseService("run_rapid_routine", &RWSServiceProvider::runRAPIDRoutine, this));
-    services_.push_back(nh_sm_addin.advertiseService("set_rapid_routine", &RWSServiceProvider::setRAPIDRoutine, this));
-
-    if (system_indicators.options().egm())
-    {
-      services_.push_back(nh_sm_addin.advertiseService("get_egm_settings", &RWSServiceProvider::getEGMSettings, this));
-      services_.push_back(nh_sm_addin.advertiseService("set_egm_settings", &RWSServiceProvider::setEGMSettings, this));
-      services_.push_back(nh_sm_addin.advertiseService("start_egm_joint", &RWSServiceProvider::startEGMJoint, this));
-      services_.push_back(nh_sm_addin.advertiseService("start_egm_pose", &RWSServiceProvider::startEGMPose, this));
-      services_.push_back(nh_sm_addin.advertiseService("start_egm_stream", &RWSServiceProvider::startEGMStream, this));
-      services_.push_back(nh_sm_addin.advertiseService("stop_egm", &RWSServiceProvider::stopEGM, this));
-      services_.push_back(nh_sm_addin.advertiseService("stop_egm_stream", &RWSServiceProvider::stopEGMStream, this));
-    }
-
-    if (system_indicators.addins().smart_gripper())
-    {
-      services_.push_back(nh_sm_addin.advertiseService("run_sg_routine", &RWSServiceProvider::runSGRoutine, this));
-      services_.push_back(nh_sm_addin.advertiseService("set_sg_command", &RWSServiceProvider::setSGCommand, this));
-    }
+    services_.push_back(nh_sm_addin.advertiseService("get_egm_settings", &RWSServiceProvider::getEGMSettings, this));
+    services_.push_back(nh_sm_addin.advertiseService("set_egm_settings", &RWSServiceProvider::setEGMSettings, this));
+    services_.push_back(nh_sm_addin.advertiseService("start_egm_joint", &RWSServiceProvider::startEGMJoint, this));
+    services_.push_back(nh_sm_addin.advertiseService("start_egm_pose", &RWSServiceProvider::startEGMPose, this));
+    services_.push_back(nh_sm_addin.advertiseService("start_egm_stream", &RWSServiceProvider::startEGMStream, this));
+    services_.push_back(nh_sm_addin.advertiseService("stop_egm", &RWSServiceProvider::stopEGM, this));
+    services_.push_back(nh_sm_addin.advertiseService("stop_egm_stream", &RWSServiceProvider::stopEGMStream, this));
   }
+
+  if (system_indicators.addins().smart_gripper())
+  {
+    services_.push_back(nh_sm_addin.advertiseService("run_sg_routine", &RWSServiceProvider::runSGRoutine, this));
+    services_.push_back(nh_sm_addin.advertiseService("set_sg_command", &RWSServiceProvider::setSGCommand, this));
+  }
+  // }
 
   ROS_INFO_NAMED(ROS_LOG_INIT, "Initialization succeeded, and the node is ready for use");
 }

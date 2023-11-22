@@ -11,19 +11,31 @@ egm:
 joint_limits:
   joint_1:
     has_velocity_limits: true
-    max_velocity: 30
+    max_velocity: 4.886
+    has_acceleration_limits: true
+    max_acceleration: 10
   joint_2:
     has_velocity_limits: true
-    max_velocity: 30
+    max_velocity: 4.886
+    has_acceleration_limits: true
+    max_acceleration: 10
   joint_3:
     has_velocity_limits: true
-    max_velocity: 30
+    max_velocity: 4.886
+    has_acceleration_limits: true
+    max_acceleration: 10
   joint_4:
     has_velocity_limits: true
-    max_velocity: 30
+    max_velocity: 4.886
+    has_acceleration_limits: true
+    max_acceleration: 10
   joint_5:
     has_velocity_limits: true
-    max_velocity: 30
+    max_velocity: 4.886
+    has_acceleration_limits: true
+    max_acceleration: 10
   joint_6:
     has_velocity_limits: true
-    max_velocity: 30
+    max_velocity: 4.886
+    has_acceleration_limits: true
+    max_acceleration: 10

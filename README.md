@@ -31,7 +31,7 @@ The included (*principal*) packages are briefly described in the following table
 
 Please see each package for more details (*e.g. additional requirements, limitations and troubleshooting*).
 
-It is recommended to utilize the `RobotWare` [StateMachine Add-In](https://robotapps.robotstudio.com/#/viewApp/c163de01-792e-4892-a290-37dbe050b6e1) to ease the setup of the ABB robot controller system. The `StateMachine Add-In` is optional, however, without it, the driver nodes will only be able to provide basic interaction with ABB robots.
+It is recommended to utilize the `RobotWare` [StateMachine Add-In](https://github.com/Amin173/statemachine_add_in_rw7) to ease the setup of the ABB robot controller system. The `StateMachine Add-In` is optional, however, without it, the driver nodes will only be able to provide basic interaction with ABB robots.
 
 ## Build Instructions
 

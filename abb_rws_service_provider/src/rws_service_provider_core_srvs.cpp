@@ -73,7 +73,7 @@ bool RWSServiceProvider::getFileContents(GetFileContents::Request& request, GetF
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Retrieve file contents from the robot controller's home directory.
     try
     {
@@ -94,6 +94,7 @@ bool RWSServiceProvider::getFileContents(GetFileContents::Request& request, GetF
 
 bool RWSServiceProvider::getIOSignal(GetIOSignal::Request& request, GetIOSignal::Response& response)
 {
+  // FIXME: new Services for every single Signal
   // //--------------------------
   // // Verification
   // //--------------------------
@@ -105,7 +106,7 @@ bool RWSServiceProvider::getIOSignal(GetIOSignal::Request& request, GetIOSignal:
   // //--------------------------
   // // Run service
   // //--------------------------
-  // rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
+  // rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface &interface)
   //                         {
   //                           // Get the IO-signal.
   //                           response.value = interface.getIOSignal(request.signal);
@@ -138,7 +139,7 @@ bool RWSServiceProvider::getRAPIDBool(GetRAPIDBool::Request& request, GetRAPIDBo
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Get the RAPID symbol.
     rws::RAPIDBool rapid_bool{};
     rws::RAPIDResource rapid_resource{ request.path.task, request.path.module, request.path.symbol };
@@ -172,7 +173,7 @@ bool RWSServiceProvider::getRAPIDDnum(GetRAPIDDnum::Request& request, GetRAPIDDn
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Get the RAPID symbol.
     rws::RAPIDDnum rapid_dnum{};
     rws::RAPIDResource rapid_resource{ request.path.task, request.path.module, request.path.symbol };
@@ -207,7 +208,7 @@ bool RWSServiceProvider::getRAPIDNum(GetRAPIDNum::Request& request, GetRAPIDNum:
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Get the RAPID symbol.
     rws::RAPIDNum rapid_num{};
     rws::RAPIDResource rapid_resource{ request.path.task, request.path.module, request.path.symbol };
@@ -242,7 +243,7 @@ bool RWSServiceProvider::getRAPIDString(GetRAPIDString::Request& request, GetRAP
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Get the RAPID symbol.
     rws::RAPIDString rapid_string{};
     rws::RAPIDResource rapid_resource{ request.path.task, request.path.module, request.path.symbol };
@@ -277,7 +278,7 @@ bool RWSServiceProvider::getRAPIDSymbol(GetRAPIDSymbol::Request& request, GetRAP
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Get the RAPID symbol.
     try
     {
@@ -306,7 +307,7 @@ bool RWSServiceProvider::getSpeedRatio(GetSpeedRatio::Request&, GetSpeedRatio::R
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Get the speed ratio.
     try
     {
@@ -338,11 +339,13 @@ bool RWSServiceProvider::ppToMain(TriggerWithResultCode::Request&, TriggerWithRe
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Reset the RAPID program pointer.
     try
     {
+      interface.requestMastership(rws::v2_0::MastershipDomain::edit);
       interface.resetRAPIDProgramPointer();
+      interface.releaseMastership(rws::v2_0::MastershipDomain::edit);
       response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
     }
     catch (const std::runtime_error& e)
@@ -368,7 +371,7 @@ bool RWSServiceProvider::setFileContents(SetFileContents::Request& request, SetF
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Upload file contents to the robot controller's home directory.
     try
     {
@@ -388,7 +391,7 @@ bool RWSServiceProvider::setFileContents(SetFileContents::Request& request, SetF
 
 bool RWSServiceProvider::setIOSignal(SetIOSignal::Request& request, SetIOSignal::Response& response)
 {
-  /** TODO: Has to be fixed for differnet IO Signal Types**/
+  /** FIXME: Has to be fixed for differnet IO Signal Types**/
 
   // //--------------------------
   // // Verification
@@ -401,7 +404,7 @@ bool RWSServiceProvider::setIOSignal(SetIOSignal::Request& request, SetIOSignal:
   // //--------------------------
   // // Run service
   // //--------------------------
-  // rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
+  // rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface &interface)
   //                         {
   //                           // Set the IO-signal.
   //                           if (interface.setIOSignal(request.signal, request.value))
@@ -430,7 +433,7 @@ bool RWSServiceProvider::setMotorsOff(TriggerWithResultCode::Request&, TriggerWi
   //--------------------------
   // Run priority service
   //--------------------------
-  rws_manager_.runPriorityService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runPriorityService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Set the motors off.
     try
     {
@@ -462,7 +465,7 @@ bool RWSServiceProvider::setMotorsOn(TriggerWithResultCode::Request&, TriggerWit
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Set the motors on.
     try
     {
@@ -494,7 +497,7 @@ bool RWSServiceProvider::setRAPIDBool(SetRAPIDBool::Request& request, SetRAPIDBo
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Set the RAPID symbol.
     rws::RAPIDBool rapid_bool{ static_cast<bool>(request.value) };
     rws::RAPIDResource rapid_resource{ request.path.task, request.path.module, request.path.symbol };
@@ -529,7 +532,7 @@ bool RWSServiceProvider::setRAPIDDnum(SetRAPIDDnum::Request& request, SetRAPIDDn
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Set the RAPID symbol.
     rws::RAPIDDnum rapid_dnum{ request.value };
     rws::RAPIDResource rapid_resource{ request.path.task, request.path.module, request.path.symbol };
@@ -564,7 +567,7 @@ bool RWSServiceProvider::setRAPIDNum(SetRAPIDNum::Request& request, SetRAPIDNum:
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Set the RAPID symbol.
     rws::RAPIDNum rapid_num{ request.value };
     rws::RAPIDResource rapid_resource{ request.path.task, request.path.module, request.path.symbol };
@@ -599,7 +602,7 @@ bool RWSServiceProvider::setRAPIDString(SetRAPIDString::Request& request, SetRAP
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Set the RAPID symbol.
     rws::RAPIDString rapid_string{ request.value };
     try
@@ -633,7 +636,7 @@ bool RWSServiceProvider::setRAPIDSymbol(SetRAPIDSymbol::Request& request, SetRAP
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Set the RAPID symbol.
     try
     {
@@ -664,7 +667,7 @@ bool RWSServiceProvider::setSpeedRatio(SetSpeedRatio::Request& request, SetSpeed
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     try
     {
       // Set the speed ratio.
@@ -697,7 +700,7 @@ bool RWSServiceProvider::startRAPID(TriggerWithResultCode::Request&, TriggerWith
   //--------------------------
   // Run service
   //--------------------------
-  rws_manager_.runService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Start RAPID execution.
     try
     {
@@ -725,7 +728,7 @@ bool RWSServiceProvider::stopRAPID(TriggerWithResultCode::Request&, TriggerWithR
   //--------------------------
   // Run priority service
   //--------------------------
-  rws_manager_.runPriorityService([&](rws::RWSStateMachineInterface& interface) {
+  rws_manager_.runPriorityService([&](rws::v2_0::RWSStateMachineInterface& interface) {
     // Stop RAPID execution.
     try
     {

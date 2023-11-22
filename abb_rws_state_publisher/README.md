@@ -23,16 +23,16 @@ Some of the data published to the ROS system include:
   - State of each `RAPID` task.
   - State of each mechanical unit.
 - Joint positions of each mechanical unit.
-- Runtime state of each `RAPID` program instance of the `RobotWare` [StateMachine Add-In](https://robotapps.robotstudio.com/#/viewApp/c163de01-792e-4892-a290-37dbe050b6e1):
+- Runtime state of each `RAPID` program instance of the `RobotWare` [StateMachine Add-In](https://github.com/Amin173/statemachine_add_in_rw7):
   - *Only collected and published if the `StateMachine Add-In` is present in the system*.
 
 Please see the [rws_state_publisher.launch](launch/rws_state_publisher.launch) file for how to start the node and available node parameters.
 
 ### Requirements
 
-- `RobotWare` version `6.07.01` or higher (less than `7.0`).
+- `RobotWare` version `7.0` or higher.
 
-Please see the underlying [abb_libegm](https://github.com/ros-industrial/abb_libegm) and [abb_librws](https://github.com/ros-industrial/abb_librws) packages for more details.
+Please see the underlying [abb_libegm](https://github.com/ros-industrial/abb_libegm) and [abb_librws](https://github.com/Amin173/abb_librws.git) packages for more details.
 
 ### Troubleshooting
 

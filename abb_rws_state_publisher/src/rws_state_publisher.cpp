@@ -107,7 +107,7 @@ RWSStatePublisher::ParameterHandler::ParameterHandler(ros::NodeHandle& nh) : rob
 RWSStatePublisher::RWSStatePublisher(ros::NodeHandle& nh_params, ros::NodeHandle& nh_msgs)
   : parameters_{ nh_params }
   , rws_manager_{ parameters_.robot_ip, static_cast<unsigned short>(parameters_.robot_port),
-                  rws::v1_0::DEFAULT_USERNAME, rws::v1_0::DEFAULT_PASSWORD }
+                  rws::v2_0::DEFAULT_USERNAME, rws::v2_0::DEFAULT_PASSWORD }
   , polling_rate_{ parameters_.polling_rate }
 {
   ROS_INFO_NAMED(ROS_LOG_INIT, "Initializing...");

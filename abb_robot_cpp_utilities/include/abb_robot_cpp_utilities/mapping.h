@@ -48,19 +48,18 @@
 
 namespace abb
 {
-    namespace robot
-    {
-        namespace utilities
-        {
-
-            /**
+namespace robot
+{
+namespace utilities
+{
+/**
  * \brief Maps RAPID task execution state to ROS representation.
  *
  * \param state to map.
  *
  * \return uint8_t containing the mapped state.
  */
-            uint8_t map(const rws::rw::RAPIDTaskExecutionState state);
+uint8_t map(const rws::rw::RAPIDTaskExecutionState state);
 
             /**
  * \brief Maps RobotWare StateMachine Add-In state to ROS representation.
@@ -89,7 +88,7 @@ namespace abb
  *
  * \throw std::runtime_error if the command is unknown.
  */
-            unsigned int mapStateMachineSGCommand(const unsigned int command);
+unsigned int mapStateMachineSGCommand(const unsigned int command);
 
             /**
  * \brief Maps a RAPID 'pos' data type from RWS to ROS representation.
@@ -152,7 +151,7 @@ namespace abb
  *
  * \return abb_rapid_sm_addin_msgs::EGMSettings containing the mapped data.
  */
-            abb_rapid_sm_addin_msgs::EGMSettings map(const rws::RWSStateMachineInterface::EGMSettings &rws_egm_settings);
+abb_rapid_sm_addin_msgs::EGMSettings map(const rws::v2_0::RWSStateMachineInterface::EGMSettings& rws_egm_settings);
 
             /**
  * \brief Maps a RAPID 'pos' data type from ROS to RWS representation.
@@ -213,9 +212,9 @@ namespace abb
  *
  * \param ros_egm_settings to map.
  *
- * \return rws::RWSStateMachineInterface::EGMSettings containing the mapped data.
+ * \return rws::v2_0::RWSStateMachineInterface::EGMSettings containing the mapped data.
  */
-            rws::RWSStateMachineInterface::EGMSettings map(const abb_rapid_sm_addin_msgs::EGMSettings &ros_egm_settings);
+rws::v2_0::RWSStateMachineInterface::EGMSettings map(const abb_rapid_sm_addin_msgs::EGMSettings& ros_egm_settings);
 
             /**
  * \brief Maps EGM state to ROS representation.
@@ -256,8 +255,8 @@ namespace abb
             template <typename type>
             std::string mapVectorToString(const std::vector<type> &vector);
 
-        }
-    }
-}
+}  // namespace utilities
+}  // namespace robot
+}  // namespace abb
 
 #endif

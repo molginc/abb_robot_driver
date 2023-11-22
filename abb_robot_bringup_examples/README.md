@@ -40,8 +40,10 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
 1. Start 3 terminals.
 2. **[Terminal 1]** Launch the example:
    ```
-   roslaunch abb_robot_bringup_examples ex1_rws_only.launch robot_ip:=<robot controller's IP address> robot_port:=<robot controller's port number>
+   roslaunch abb_robot_bringup_examples ex1_rws_only.launch robot_ip:=<robot controller's IP address> robot_port:=<rws listening port number>
    ```
+   **Default port number on the OmniCore controller was tested to be `443`.**
+
 3. **[Terminal 2]** Use `rostopic` to, for example, list available topics and then listen for general robot controller states:
    ```
    rostopic list
@@ -71,17 +73,16 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
 - The `ros_control` controller, which command motions, is only allowed to start if an `EGM` session is active.
 
 #### Steps
-1. Install the support and moveit_config packages -- see [this thread](https://github.com/ros-industrial/abb_robot_driver/issues/11) for updating the moveit_config and support packages to use abb_robot_driver instead of the old abb_driver. 
+1. Install the moveit_config and support packages from abb_experimnetal - see [this thread](https://github.com/ros-industrial/abb_robot_driver/issues/11) on how to updated these packages for usign abb_robot_driver instead of the old abb_driver.
 
 2. Start 4 terminals.
 
 3. **[Terminal 1]** Launch the example:
    ```
-   roslaunch <robot_model>_moveit_config moveit_planning_execution.launch robot_ip:=<robot controller's IP address> robot_port:=<robot controller's port number> robot_nickname:=<robot nickname for multi-robot setup>
+   roslaunch crb1100_580_moveit_config moveit_planning_execution.launch robot_ip:=<robot controller's IP address> robot_port:=<rws listening port number> sim:=false robot_nickname:<robot nickname for multi-robot setups>
    ```
-   RVIZ should launch at this stage and show the robot state. If the 
    
-4. **[Terminal 2]** Use `rostopic` to listen for `EGM` channel states:
+3. **[Terminal 2]** Use `rostopic` to listen for `EGM` channel states:
    ```
    rostopic echo -c /egm/egm_states
    ```
@@ -100,9 +101,10 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
    start_asap: false
    timeout: 0.0"
    ```
-7. Use MoveIt! to send motion commands to the robot.
 
-8. **[Terminal 3]** Use `rosservice` to stop the `EGM` session:
+6. Send motion commands through MoveIt!
+
+7. **[Terminal 3]** Use `rosservice` to stop the `EGM` session:
    ```
    rosservice call /rws/sm_addin/stop_egm "{}"
    ```
@@ -129,7 +131,7 @@ Please inspect the files in the [launch](launch) and [config](config) folders fo
 1. Start 4 terminals.
 2. **[Terminal 1]** Launch the example:
    ```
-   roslaunch abb_robot_bringup_examples ex3_rws_and_egm_yumi_robot.launch robot_ip:=<robot controller's IP address> robot_port:=<robot controller's port number>
+   roslaunch abb_robot_bringup_examples ex3_rws_and_egm_yumi_robot.launch robot_ip:=<robot controller's IP address> robot_port:=<rws listening port number>
    ```
 3. **[Terminal 2]** Use `rostopic` to listen for `EGM` channel states:
    ```

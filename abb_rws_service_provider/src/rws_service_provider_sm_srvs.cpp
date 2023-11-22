@@ -47,15 +47,14 @@ namespace
   /**
  * \brief Name for ROS logging in the 'services' context.
  */
-  constexpr char ROS_LOG_SERVICES[]{"services"};
-}
+constexpr char ROS_LOG_SERVICES[]{ "services" };
+}  // namespace
 
 namespace abb
 {
-  namespace robot
-  {
-
-    using RAPIDSymbols = rws::RWSStateMachineInterface::ResourceIdentifiers::RAPID::Symbols;
+namespace robot
+{
+using RAPIDSymbols = rws::v2_0::RWSStateMachineInterface::ResourceIdentifiers::RAPID::Symbols;
 
     /***********************************************************************************************************************
  * Class definitions: RWSServiceProvider
@@ -65,436 +64,406 @@ namespace abb
  * Auxiliary methods (StateMachine Add-In RWS services)
  */
 
-    bool RWSServiceProvider::getEGMSettings(GetEGMSettings::Request &request, GetEGMSettings::Response &response)
+bool RWSServiceProvider::getEGMSettings(GetEGMSettings::Request& request, GetEGMSettings::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyArgumentRAPIDTask(request.task, response.result_code, response.message))
+    return true;
+  if (!verifySMAddInRuntimeStates(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInTaskExist(request.task, response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    rws::v2_0::RWSStateMachineInterface::EGMSettings settings{};
+
+    // Get the EGM RAPID settings.
+    try
     {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyArgumentRAPIDTask(request.task, response.result_code, response.message))
-        return true;
-      if (!verifySMAddInRuntimeStates(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInTaskExist(request.task, response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                rws::RWSStateMachineInterface::EGMSettings settings{};
-
-                                // Get the EGM RAPID settings.
-                                try
-                                {
-                                  interface.services().egm().getSettings(request.task, &settings);
-                                  response.settings = utilities::map(settings);
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::invalid_argument &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
+      interface.services().egm().getSettings(request.task, &settings);
+      response.settings = utilities::map(settings);
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::invalid_argument& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
     }
 
-    bool RWSServiceProvider::setEGMSettings(SetEGMSettings::Request &request, SetEGMSettings::Response &response)
+bool RWSServiceProvider::setEGMSettings(SetEGMSettings::Request& request, SetEGMSettings::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyArgumentRAPIDTask(request.task, response.result_code, response.message))
+    return true;
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInRuntimeStates(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInTaskExist(request.task, response.result_code, response.message))
+    return true;
+  if (!verifySMAddInTaskInitialized(request.task, response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    rws::v2_0::RWSStateMachineInterface::EGMSettings settings = utilities::map(request.settings);
+
+    // Set the EGM RAPID settings.
+    try
     {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyArgumentRAPIDTask(request.task, response.result_code, response.message))
-        return true;
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInRuntimeStates(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInTaskExist(request.task, response.result_code, response.message))
-        return true;
-      if (!verifySMAddInTaskInitialized(request.task, response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                rws::RWSStateMachineInterface::EGMSettings settings = utilities::map(request.settings);
-
-                                // Set the EGM RAPID settings.
-                                try
-                                {
-                                  interface.services().egm().setSettings(request.task, settings);
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::logic_error &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
+      interface.services().egm().setSettings(request.task, settings);
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::logic_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
     }
 
-    bool RWSServiceProvider::setRAPIDRoutine(SetRAPIDRoutine::Request &request, SetRAPIDRoutine::Response &response)
-    {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyArgumentRAPIDTask(request.task, response.result_code, response.message))
-        return true;
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInRuntimeStates(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInTaskExist(request.task, response.result_code, response.message))
-        return true;
-      if (!verifySMAddInTaskInitialized(request.task, response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                // Set the SmartGripper RAPID variables.
-                                try
-                                {
-                                  interface.services().rapid().setRoutineName(request.task, request.routine);
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::runtime_error &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
-    }
-
-    bool RWSServiceProvider::setSGCommand(SetSGCommand::Request &request, SetSGCommand::Response &response)
-    {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyArgumentRAPIDTask(request.task, response.result_code, response.message))
-        return true;
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInRuntimeStates(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInTaskExist(request.task, response.result_code, response.message))
-        return true;
-      if (!verifySMAddInTaskInitialized(request.task, response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Map argument
-      //--------------------------
-      unsigned int request_command{0};
-      try
-      {
-        request_command = utilities::mapStateMachineSGCommand(request.command);
-      }
-      catch (const std::runtime_error &exception)
-      {
-        response.message = exception.what();
-        response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-        return true;
-      }
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                rws::RAPIDNum sg_command_input{static_cast<float>(request_command)};
-                                rws::RAPIDNum sg_target_position_input{request.target_position};
-
-                                rws::RAPIDResource rr_command_input{request.task, RAPIDSymbols::SG_COMMAND_INPUT};
-                                rws::RAPIDResource rr_target_position_input{request.task, RAPIDSymbols::SG_TARGET_POSTION_INPUT};
-
-                                // Set the SmartGripper RAPID variables.
-                                try
-                                {
-                                  interface.setRAPIDSymbolData(rr_command_input, sg_command_input);
-                                  interface.setRAPIDSymbolData(rr_target_position_input, sg_target_position_input);
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::runtime_error &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
-    }
-
-    bool RWSServiceProvider::runRAPIDRoutine(TriggerWithResultCode::Request &, TriggerWithResultCode::Response &response)
-    {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifyRAPIDRunning(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInRuntimeStates(response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                // Signal start of EGM joint motions.
-                                try
-                                {
-                                  interface.services().rapid().signalRunRAPIDRoutine();
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::runtime_error &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
-    }
-
-    bool RWSServiceProvider::runSGRoutine(TriggerWithResultCode::Request &, TriggerWithResultCode::Response &response)
-    {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifyRAPIDRunning(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInRuntimeStates(response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                // Signal start of EGM joint motions.
-                                try
-                                {
-                                  interface.services().sg().signalRunSGRoutine();
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::runtime_error &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
-    }
-
-    bool RWSServiceProvider::startEGMJoint(TriggerWithResultCode::Request &, TriggerWithResultCode::Response &response)
-    {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifyRAPIDRunning(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInRuntimeStates(response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                // Signal start of EGM joint motions.
-                                try
-                                {
-                                  interface.services().egm().signalEGMStartJoint();
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::runtime_error &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
-    }
-
-    bool RWSServiceProvider::startEGMPose(TriggerWithResultCode::Request &, TriggerWithResultCode::Response &response)
-    {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifyRAPIDRunning(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInRuntimeStates(response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                // Signal start of EGM pose motions.
-                                try
-                                {
-                                  interface.services().egm().signalEGMStartPose();
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::runtime_error &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
-    }
-
-    bool RWSServiceProvider::startEGMStream(TriggerWithResultCode::Request &, TriggerWithResultCode::Response &response)
-    {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifyRAPIDRunning(response.result_code, response.message))
-        return true;
-      if (!verifySMAddInRuntimeStates(response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                // Signal start of EGM position streaming.
-                                try
-                                {
-                                  interface.services().egm().signalEGMStartStream();
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::runtime_error &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
-    }
-
-    bool RWSServiceProvider::stopEGM(TriggerWithResultCode::Request &, TriggerWithResultCode::Response &response)
-    {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifyRAPIDRunning(response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run priority service
-      //--------------------------
-      rws_manager_.runPriorityService([&](rws::RWSStateMachineInterface &interface)
-                                      {
-                                        // Signal stop of EGM motions.
-                                        try
-                                        {
-                                          response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                          interface.services().egm().signalEGMStop();
-                                        }
-                                        catch (const std::runtime_error &e)
-                                        {
-                                          response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                          response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                          // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                        }
-                                      });
-
-      return true;
-    }
-
-    bool RWSServiceProvider::stopEGMStream(TriggerWithResultCode::Request &, TriggerWithResultCode::Response &response)
-    {
-      //--------------------------
-      // Verification
-      //--------------------------
-      if (!verifyAutoMode(response.result_code, response.message))
-        return true;
-      if (!verifyRAPIDRunning(response.result_code, response.message))
-        return true;
-      if (!verifyRWSManagerReady(response.result_code, response.message))
-        return true;
-
-      //--------------------------
-      // Run service
-      //--------------------------
-      rws_manager_.runService([&](rws::RWSStateMachineInterface &interface)
-                              {
-                                // Signal stop of EGM position streaming.
-                                try
-                                {
-                                  interface.services().egm().signalEGMStopStream();
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
-                                }
-                                catch (const std::runtime_error &e)
-                                {
-                                  response.message = abb_robot_msgs::ServiceResponses::FAILED;
-                                  response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
-                                  // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
-                                }
-                              });
-
-      return true;
-    }
-
-  }
+  return true;
 }
+
+bool RWSServiceProvider::setRAPIDRoutine(SetRAPIDRoutine::Request& request, SetRAPIDRoutine::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyArgumentRAPIDTask(request.task, response.result_code, response.message))
+    return true;
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInRuntimeStates(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInTaskExist(request.task, response.result_code, response.message))
+    return true;
+  if (!verifySMAddInTaskInitialized(request.task, response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Set the SmartGripper RAPID variables.
+    try
+    {
+      interface.services().rapid().setRoutineName(request.task, request.routine);
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
+    }
+  });
+
+  return true;
+}
+
+bool RWSServiceProvider::setSGCommand(SetSGCommand::Request& request, SetSGCommand::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyArgumentRAPIDTask(request.task, response.result_code, response.message))
+    return true;
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInRuntimeStates(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInTaskExist(request.task, response.result_code, response.message))
+    return true;
+  if (!verifySMAddInTaskInitialized(request.task, response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Map argument
+  //--------------------------
+  unsigned int request_command{ 0 };
+  try
+  {
+    request_command = utilities::mapStateMachineSGCommand(request.command);
+  }
+  catch (const std::runtime_error& exception)
+  {
+    response.message = exception.what();
+    response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+    return true;
+  }
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    rws::RAPIDNum sg_command_input{ static_cast<float>(request_command) };
+    rws::RAPIDNum sg_target_position_input{ request.target_position };
+
+    rws::RAPIDResource rr_command_input{ request.task, RAPIDSymbols::SG_COMMAND_INPUT };
+    rws::RAPIDResource rr_target_position_input{ request.task, RAPIDSymbols::SG_TARGET_POSTION_INPUT };
+
+    // Set the SmartGripper RAPID variables.
+    try
+    {
+      interface.setRAPIDSymbolData(rr_command_input, sg_command_input);
+      interface.setRAPIDSymbolData(rr_target_position_input, sg_target_position_input);
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
+    }
+
+bool RWSServiceProvider::runRAPIDRoutine(TriggerWithResultCode::Request&, TriggerWithResultCode::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifyRAPIDRunning(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInRuntimeStates(response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Signal start of EGM joint motions.
+    try
+    {
+      interface.services().rapid().signalRunRAPIDRoutine();
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
+    }
+  });
+
+  return true;
+}
+
+bool RWSServiceProvider::runSGRoutine(TriggerWithResultCode::Request&, TriggerWithResultCode::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifyRAPIDRunning(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInRuntimeStates(response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Signal start of EGM joint motions.
+    try
+    {
+      interface.services().sg().signalRunSGRoutine();
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
+    }
+
+  return true;
+}
+
+bool RWSServiceProvider::startEGMJoint(TriggerWithResultCode::Request&, TriggerWithResultCode::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifyRAPIDRunning(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInRuntimeStates(response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Signal start of EGM joint motions.
+    try
+    {
+      interface.services().egm().signalEGMStartJoint();
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, e.what());
+    }
+
+bool RWSServiceProvider::startEGMPose(TriggerWithResultCode::Request&, TriggerWithResultCode::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifyRAPIDRunning(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInRuntimeStates(response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Signal start of EGM pose motions.
+    try
+    {
+      interface.services().egm().signalEGMStartPose();
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
+    }
+  });
+
+  return true;
+}
+
+bool RWSServiceProvider::startEGMStream(TriggerWithResultCode::Request&, TriggerWithResultCode::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifyRAPIDRunning(response.result_code, response.message))
+    return true;
+  if (!verifySMAddInRuntimeStates(response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Signal start of EGM position streaming.
+    try
+    {
+      interface.services().egm().signalEGMStartStream();
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
+    }
+
+bool RWSServiceProvider::stopEGM(TriggerWithResultCode::Request&, TriggerWithResultCode::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifyRAPIDRunning(response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run priority service
+  //--------------------------
+  rws_manager_.runPriorityService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Signal stop of EGM motions.
+    try
+    {
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+      interface.services().egm().signalEGMStop();
+    }
+    catch (const std::runtime_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
+    }
+  });
+
+  return true;
+}
+
+bool RWSServiceProvider::stopEGMStream(TriggerWithResultCode::Request&, TriggerWithResultCode::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyAutoMode(response.result_code, response.message))
+    return true;
+  if (!verifyRAPIDRunning(response.result_code, response.message))
+    return true;
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Signal stop of EGM position streaming.
+    try
+    {
+      interface.services().egm().signalEGMStopStream();
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& e)
+    {
+      response.message = abb_robot_msgs::ServiceResponses::FAILED;
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+      // ROS_DEBUG_STREAM_NAMED(ROS_LOG_SERVICES, interface.getLogTextLatestEvent());
+    }
+
+  return true;
+}
+
+}  // namespace robot
+}  // namespace abb
