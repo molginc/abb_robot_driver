@@ -169,7 +169,7 @@ void EGMHardwareInterface::read(const ros::Time& time, const ros::Duration& peri
   // Print log messages.
   if (any_controller_started_ && !read_ok)
   {
-    ROS_WARN_STREAM_THROTTLE_NAMED(THROTTLE_TIME, ROS_LOG_RUNTIME,
+    ROS_DEBUG_STREAM_THROTTLE_NAMED(THROTTLE_TIME, ROS_LOG_RUNTIME,
                                    "Timed out while waiting for EGM feedback "
                                    "(did the EGM session end on the robot controller?)");
     print_feedback_received_ = true;
