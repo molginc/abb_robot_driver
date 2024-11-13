@@ -164,7 +164,10 @@ void EGMHardwareInterface::read(const ros::Time& time, const ros::Duration& peri
   //--------------------------------------------------------
   // Read feedback from the EGM channels
   //--------------------------------------------------------
-  bool read_ok{ p_egm_manager_->read(motion_data_) };
+  // Note: read_ok is initialized with the boolean result from ->read(). if data is received, it is read but nothing is done with it?? 
+  std::pair<bool, abb::egm::wrapper::Feedback> feedback_pair{ p_egm_manager_->read(motion_data_) };
+  bool read_ok{ feedback_pair.first };
+  abb::egm::wrapper::Feedback feedback{ feedback_pair.second };
 
   // Print log messages.
   if (any_controller_started_ && !read_ok)
