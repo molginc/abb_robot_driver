@@ -46,6 +46,7 @@
 #include <abb_robot_cpp_utilities/verification.h>
 
 #include "abb_egm_hardware_interface/egm_hardware_interface.h"
+#include <map>
 
 namespace
 {
@@ -153,6 +154,54 @@ ros::Duration EGMHardwareInterface::waitForMessage()
   return ros::Time::now() - wait_start;
 }
 
+std::map<std::string, std::vector<double>> EGMHardwareInterface::getFeedback()
+{
+  std::map<std::string, std::vector<double>> feedback_map;
+
+  if (!p_egm_manager_)
+    throw std::runtime_error{ "The EGM manager has not been initialized. Cant get feedback." };
+
+  //--------------------------------------------------------
+  // Read feedback from the EGM channels
+  //--------------------------------------------------------
+  // Note: read_ok is initialized with the boolean result from ->read(). if data is received, it is read but nothing is done with it?? 
+  std::pair<bool, abb::egm::wrapper::Feedback> feedback_pair{ p_egm_manager_->read(motion_data_) };
+  bool read_ok{ feedback_pair.first };
+  abb::egm::wrapper::Feedback feedback{ feedback_pair.second };
+
+  // extract array of 6 joint values in degrees -> contained values are doubles 
+  auto joint_angles = feedback.robot().joints().position().values();
+  // extract velocities for each joint -> contained values are doubles
+  auto joint_velocities = feedback.robot().joints().velocity().values();
+
+  // array of 3 doubles (xyz) in mm 
+  auto cart_position = feedback.robot().cartesian().pose().position();
+  // array of 3 doubles (xyz) in degrees
+  auto cart_euler = feedback.robot().cartesian().pose().euler();
+  // array of quat in W X Y Z format 
+  auto cart_quat = feedback.robot().cartesian().pose().quaternion();
+  // array of 3 doubles (xyz) in m/s
+  auto cart_vel = feedback.robot().cartesian().velocity().linear();
+  // array of 3 doubles (xyz) in rad/s
+  auto cart_angular_vel = feedback.robot().cartesian().velocity().angular();
+
+  // timestamp in sec, usec 
+  int timestamp_sec = feedback.time().sec();
+  int timestamp_usec = feedback.time().usec();
+
+  // TODO: Currently this is where the feedback message ends. If we want to look at goal, goal status, or next planned motion we will need to return the whole Input object from the egm_manager
+  feedback_map["joint_angles"] = std::vector<double>(joint_angles.begin(), joint_angles.end());
+  feedback_map["joint_velocities"] = std::vector<double>(joint_velocities.begin(), joint_velocities.end());
+  feedback_map["cart_position"] = {cart_position.x(), cart_position.y(), cart_position.z()};
+  feedback_map["cart_euler"] = {cart_euler.x(), cart_euler.y(), cart_euler.z()};
+  feedback_map["cart_quat"] = {cart_quat.u0(), cart_quat.u1(), cart_quat.u2(), cart_quat.u3()};
+  feedback_map["cart_vel"] = {cart_vel.x(), cart_vel.y(), cart_vel.z()};
+  feedback_map["cart_angular_vel"] = {cart_angular_vel.x(), cart_angular_vel.y(), cart_angular_vel.z()};
+  feedback_map["timestamp"] = {static_cast<double>(timestamp_sec), static_cast<double>(timestamp_usec)};
+
+  return feedback_map;
+}
+
 void EGMHardwareInterface::read(const ros::Time& time, const ros::Duration& period)
 {
   (void)time;
@@ -168,7 +217,25 @@ void EGMHardwareInterface::read(const ros::Time& time, const ros::Duration& peri
   std::pair<bool, abb::egm::wrapper::Feedback> feedback_pair{ p_egm_manager_->read(motion_data_) };
   bool read_ok{ feedback_pair.first };
   abb::egm::wrapper::Feedback feedback{ feedback_pair.second };
-
+  // Print feedback using ROS_INFO
+  
+  // ROS_WARN_STREAM_NAMED(ROS_LOG_RUNTIME,"Cartesian Position: [" << feedback.robot().cartesian().pose().position().x() << ", "
+  //                                         << feedback.robot().cartesian().pose().position().y() << ", "
+  //                                         << feedback.robot().cartesian().pose().position().z() << "]");
+  // ROS_WARN_STREAM_NAMED(ROS_LOG_RUNTIME,"Cartesian Euler Angles: [" << feedback.robot().cartesian().pose().euler().x() << ", "
+  //                                             << feedback.robot().cartesian().pose().euler().y() << ", "
+  //                                             << feedback.robot().cartesian().pose().euler().z() << "]");
+  // ROS_WARN_STREAM_NAMED(ROS_LOG_RUNTIME,"Cartesian Quaternion: [" << feedback.robot().cartesian().pose().quaternion().u0() << ", "
+  //                                           << feedback.robot().cartesian().pose().quaternion().u1() << ", "
+  //                                           << feedback.robot().cartesian().pose().quaternion().u2() << ", "
+  //                                           << feedback.robot().cartesian().pose().quaternion().u3() << "]");
+  // ROS_WARN_STREAM_NAMED(ROS_LOG_RUNTIME,"Cartesian Velocity: [" << feedback.robot().cartesian().velocity().linear().x() << ", "
+  //                                         << feedback.robot().cartesian().velocity().linear().y() << ", "
+  //                                         << feedback.robot().cartesian().velocity().linear().z() << "]");
+  // ROS_WARN_STREAM_NAMED(ROS_LOG_RUNTIME,"Cartesian Angular Velocity: [" << feedback.robot().cartesian().velocity().angular().x() << ", "
+  //                                                 << feedback.robot().cartesian().velocity().angular().y() << ", "
+  //                                                 << feedback.robot().cartesian().velocity().angular().z() << "]");
+  // ROS_WARN_STREAM_NAMED(ROS_LOG_RUNTIME,"Timestamp: [" << feedback.time().sec() << ", " << feedback.time().usec() << "]");
   // Print log messages.
   if (any_controller_started_ && !read_ok)
   {

@@ -46,6 +46,8 @@
 #include <abb_egm_hardware_interface/egm_hardware_interface.h>
 
 #include <abb_robot_cpp_utilities/parameters.h>
+#include <abb_egm_hardware_interface/egmfeedback.h>
+#include <abb_egm_hardware_interface/feedback.h>
 
 namespace
 {
@@ -59,6 +61,12 @@ constexpr char ROS_LOG_MAIN[]{"main"};
  */
 constexpr double ROS_SERVICE_TIMEOUT{30.0};
 }
+
+/**
+ * \brief creates a ros service to advertise feedback 
+ * \return true if service call was succesful
+ */
+std::tuple<std::vector<std::string>,std::vector<std::string>> FormatFeedback(std::map<std::string, std::vector<double>> feedback);
 
 /**
  * \brief Gets a ABB robot controller description via a ROS service call.
@@ -110,6 +118,9 @@ int main(int argc, char** argv)
     // Create a controller manager, to manage the
     // hardware interface and active controllers.
     controller_manager::ControllerManager cm{&hw, nh};
+    
+    ros::Publisher egm_feedback = nh.advertise<abb_egm_hardware_interface::feedback>("egm_feedback", 1000);
+    abb_egm_hardware_interface::feedback msg;
 
     // Run the control loop.
     ros::Time time_now{};
@@ -117,9 +128,20 @@ int main(int argc, char** argv)
     while(ros::ok())
     {
       period = hw.waitForMessage();
-
       time_now = ros::Time::now();
       hw.read(time_now, period);
+
+      // get feedback from read service and format as vector of string messages for broadcasting 
+      auto [keys,vals]= FormatFeedback(hw.getFeedback());
+
+      // ::abb_egm_hardware_interface::feedback test_vec;
+      // publish feedback
+      msg.keys = keys;
+      msg.values = vals;
+      egm_feedback.publish(msg);
+      ROS_INFO_STREAM_NAMED(ROS_LOG_MAIN, "Feedback keys: " << boost::algorithm::join(keys, ", "));
+      ROS_INFO_STREAM_NAMED(ROS_LOG_MAIN, "Feedback values: " << boost::algorithm::join(vals, ", "));
+
       cm.update(time_now, period, hw.resetNeeded());
       hw.write(time_now, period);
     }
@@ -152,6 +174,28 @@ int main(int argc, char** argv)
 
   return EXIT_SUCCESS;
 }
+
+
+std::tuple<std::vector<std::string>,std::vector<std::string>> FormatFeedback(std::map<std::string, std::vector<double>> feedback)
+{
+  std::vector<std::string> keys;
+  std::vector<std::string> vals;
+
+  for (auto const& [key, val] : feedback)
+  {
+    keys.push_back(key);
+    std::string str_val = "";
+    for (auto const& v : val)
+    {
+      str_val += std::to_string(v) + " ";
+    }
+    vals.push_back(str_val);
+  }
+  std::tuple feedback_map = std::make_tuple(keys,vals);
+  // std::tuple<std::vector<std::string>,std::vector<std::string>> feedback_map;
+  return feedback_map;
+}
+
 
 void getRobotControllerDescription(ros::NodeHandle& nh)
 {

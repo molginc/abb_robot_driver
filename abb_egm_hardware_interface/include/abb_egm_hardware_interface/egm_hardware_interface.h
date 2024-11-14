@@ -101,6 +101,16 @@ public:
   ros::Duration waitForMessage();
 
   /**
+   * \brief Gets feedback from the hardware.
+   *
+   * \return std::map<std::string, std::vector<double>> containing the feedback.
+   *
+   * \throw std::runtime_error if the hardware interface is uninitialized.
+   */
+  std::map<std::string, std::vector<double>> getFeedback();
+
+
+  /**
    * \brief Reads a message from the hardware.
    *
    * \param time specifying the current time.

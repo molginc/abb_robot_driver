@@ -52,7 +52,21 @@ find_package(catkin REQUIRED
     controller_manager_msgs
     hardware_interface
     roscpp
+    std_msgs
+    message_generation
 )
+
+add_message_files(
+  FILES
+  feedback.msg
+)
+add_service_files(
+  FILES
+  egmfeedback.srv
+)
+
+
+generate_messages()
 
 #===========================================================
 # Catkin package specific configurations
@@ -70,6 +84,7 @@ catkin_package(
     controller_manager_msgs
     hardware_interface
     roscpp
+    message_runtime
   DEPENDS
     abb_egm_rws_managers
     abb_libegm
@@ -78,6 +93,7 @@ catkin_package(
     Poco
     Protobuf
 )
+
 
 #===========================================================
 # Settings
