@@ -238,7 +238,7 @@ void EGMHardwareInterface::read(const ros::Time& time, const ros::Duration& peri
     {
       // idk why this is done, but i'm adding it in for cartesian too - Dyllian 
       unit.pose.command.position = unit.pose.state.position;
-      
+
       for (auto& joint : unit.joints)
       {
         joint.command.position = joint.state.position;
@@ -590,7 +590,8 @@ void EGMHardwareInterface::initializeROSControlLayer(ros::NodeHandle& nh)
 {
   // Get the user specified list of ros_control controllers that are always ok to start.
   utilities::getParameter(nh, "ros_control/controllers/always_ok_to_start", controllers_always_ok_to_start_, { "" });
-
+  // temp location to instantiate the cartesian controller 
+  // ros_controllers_cartesian::CartesianStateInterface cart_interface_;
   //--------------------------------------------------------
   // Motion interfaces
   //--------------------------------------------------------
@@ -607,7 +608,6 @@ void EGMHardwareInterface::initializeROSControlLayer(ros::NodeHandle& nh)
     EGMStateHandle egm_state_handle{ group.egm_channel_data.name, &group.egm_channel_data };
     egm_state_interface_.registerHandle(egm_state_handle);
 
-    // temp location to instantiate the cartesian controller 
 
     for (auto& unit : group.units)
     {
@@ -616,15 +616,18 @@ void EGMHardwareInterface::initializeROSControlLayer(ros::NodeHandle& nh)
       //--------------------------------------------------------
       std::string reference_frame = "base";
       std::string controlled_frame = "tool0";
+
       // all of these values are empty but we can get them from .read as needed in the future if we want to do accel or speed based control
       ros_controllers_cartesian::CartesianStateHandle cartesian_state_handle{ reference_frame, controlled_frame, &unit.pose.state.position,
                                         &unit.pose.state.velocity,   &unit.pose.state.acceleration,    &unit.pose.state.jerk};
+      
+      cart_interface_.registerHandle(cartesian_state_handle);
       //----------------------------------------------------
       // Cartesian Interfaces 
       //----------------------------------------------------
-      ros_controllers_cartesian::PoseCommandHandle pose_cmd_handle(cartesian_state_handle, &unit.pose.command.position);
-      ros_controllers_cartesian::PoseCommandInterface pose_command_interface;
-      pose_command_interface.registerHandle(pose_cmd_handle);
+   
+      pose_interface_.registerHandle(ros_controllers_cartesian::PoseCommandHandle(cart_interface_.getHandle("tool0"), &unit.pose.command.position));
+      pose_interface_.getHandle("tool0");
       //----------------------------------------------------
       // Joint interfaces
       //----------------------------------------------------
@@ -749,7 +752,7 @@ void EGMHardwareInterface::initializeROSControlLayer(ros::NodeHandle& nh)
   registerInterface(&joint_velocity_interface_);
   registerInterface(&joint_position_velocity_interface_);
   // register the cartesian interface 
-  registerInterface(&pose_command_interface_);
+  registerInterface(&pose_interface_);
 }
 
 }  // namespace robot

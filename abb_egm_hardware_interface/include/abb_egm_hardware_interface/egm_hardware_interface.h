@@ -227,8 +227,13 @@ private:
   /**
    * \brief Interface for using cartesian pose commands.
    */
-  ros_controllers_cartesian::PoseCommandInterface pose_command_interface_;
-  
+  ros_controllers_cartesian::PoseCommandInterface pose_interface_;
+
+  /**
+   * \brief cartesian state interface
+   */
+  ros_controllers_cartesian::CartesianStateInterface cart_interface_;
+
   /**
    * \brief Description of the connected robot controller.
    */
