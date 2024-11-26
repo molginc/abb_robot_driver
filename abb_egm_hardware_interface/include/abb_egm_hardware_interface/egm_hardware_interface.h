@@ -51,6 +51,7 @@
 #include <hardware_interface/robot_hw.h>
 
 #include <joint_limits_interface/joint_limits_interface.h>
+#include <cartesian_interface/cartesian_command_interface.h>
 
 #include <abb_egm_rws_managers/egm_manager.h>
 
@@ -223,6 +224,11 @@ private:
    */
   joint_limits_interface::VelocityJointSoftLimitsInterface joint_velocity_soft_limits_interface_;
 
+  /**
+   * \brief Interface for using cartesian pose commands.
+   */
+  ros_controllers_cartesian::PoseCommandInterface pose_command_interface_;
+  
   /**
    * \brief Description of the connected robot controller.
    */

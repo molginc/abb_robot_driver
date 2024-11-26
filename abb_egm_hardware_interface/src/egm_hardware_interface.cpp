@@ -45,7 +45,13 @@
 #include <abb_robot_cpp_utilities/parameters.h>
 #include <abb_robot_cpp_utilities/verification.h>
 
+#include <geometry_msgs/Accel.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Twist.h>
+
 #include "abb_egm_hardware_interface/egm_hardware_interface.h"
+#include <cartesian_interface/cartesian_state_handle.h>
+
 
 namespace
 {
@@ -598,8 +604,24 @@ void EGMHardwareInterface::initializeROSControlLayer(ros::NodeHandle& nh)
     EGMStateHandle egm_state_handle{ group.egm_channel_data.name, &group.egm_channel_data };
     egm_state_interface_.registerHandle(egm_state_handle);
 
+    // temp location to instantiate the cartesian controller 
+
     for (auto& unit : group.units)
     {
+      //--------------------------------------------------------
+      // Dumbass inits for cartesian control interface 
+      //--------------------------------------------------------
+      std::string reference_frame = "base";
+      std::string controlled_frame = "tool0";
+      // all of these values are empty but we can get them from .read as needed in the future if we want to do accel or speed based control
+      ros_controllers_cartesian::CartesianStateHandle cartesian_state_handle{ reference_frame, controlled_frame, &unit.pose.state.position,
+                                        &unit.pose.state.velocity,   &unit.pose.state.acceleration,    &unit.pose.state.jerk};
+      //----------------------------------------------------
+      // Cartesian Interfaces 
+      //----------------------------------------------------
+      ros_controllers_cartesian::PoseCommandHandle pose_cmd_handle(cartesian_state_handle, &unit.pose.command.position);
+      ros_controllers_cartesian::PoseCommandInterface pose_command_interface;
+      pose_command_interface.registerHandle(pose_cmd_handle);
       //----------------------------------------------------
       // Joint interfaces
       //----------------------------------------------------
@@ -708,6 +730,7 @@ void EGMHardwareInterface::initializeROSControlLayer(ros::NodeHandle& nh)
         joint_limits_interface::PositionJointSoftLimitsHandle pos_limits_handle(joint_pos_handle, limits, soft_limits);
         joint_limits_interface::VelocityJointSoftLimitsHandle vel_limits_handle(joint_vel_handle, limits, soft_limits);
 
+
         joint_position_soft_limits_interface_.registerHandle(pos_limits_handle);
         joint_velocity_soft_limits_interface_.registerHandle(vel_limits_handle);
       }
@@ -722,6 +745,8 @@ void EGMHardwareInterface::initializeROSControlLayer(ros::NodeHandle& nh)
   registerInterface(&joint_position_interface_);
   registerInterface(&joint_velocity_interface_);
   registerInterface(&joint_position_velocity_interface_);
+  // register the cartesian interface 
+  registerInterface(&pose_command_interface_);
 }
 
 }  // namespace robot
