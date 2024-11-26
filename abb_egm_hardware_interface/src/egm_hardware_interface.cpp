@@ -236,6 +236,9 @@ void EGMHardwareInterface::read(const ros::Time& time, const ros::Duration& peri
 
     for (auto& unit : group.units)
     {
+      // idk why this is done, but i'm adding it in for cartesian too - Dyllian 
+      unit.pose.command.position = unit.pose.state.position;
+      
       for (auto& joint : unit.joints)
       {
         joint.command.position = joint.state.position;
