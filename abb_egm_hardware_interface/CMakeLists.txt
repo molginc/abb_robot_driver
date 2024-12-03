@@ -52,6 +52,7 @@ find_package(catkin REQUIRED
     controller_manager_msgs
     hardware_interface
     roscpp
+    cartesian_interface
 )
 
 #===========================================================
@@ -70,6 +71,7 @@ catkin_package(
     controller_manager_msgs
     hardware_interface
     roscpp
+    cartesian_interface
   DEPENDS
     abb_egm_rws_managers
     abb_libegm

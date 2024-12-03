@@ -24,4 +24,5 @@
   <depend>hardware_interface</depend>
   <depend>joint_limits_interface</depend>
   <depend>roscpp</depend>
+  <depend>cartesian_interface</depend>
 </package>
