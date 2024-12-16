@@ -44,6 +44,7 @@
 #include <abb_robot_cpp_utilities/verification.h>
 #include <abb_robot_msgs/SystemState.h>
 #include <sensor_msgs/JointState.h>
+#include <geometry_msgs/PoseStamped.h>
 
 #include <stdexcept>
 
@@ -128,6 +129,8 @@ RWSStatePublisher::RWSStatePublisher(ros::NodeHandle& nh_params, ros::NodeHandle
   //--------------------------------------------------------
   joint_state_publisher_ = nh_msgs.advertise<sensor_msgs::JointState>("joint_states", 1);
   system_state_publisher_ = nh_msgs.advertise<abb_robot_msgs::SystemState>("system_states", 1);
+  // TEST PUBLISHER FOR ROBOT POSE 
+  robot_pose_publisher_ = nh_msgs.advertise<geometry_msgs::PoseStamped>("robot_pose", 1);
 
   if (utilities::verifyStateMachineAddInPresence(robot_controller_description_.system_indicators()))
   {
@@ -163,6 +166,10 @@ void RWSStatePublisher::pollingTimerCallback(const ros::TimerEvent& event)
   }
 
   //--------------------------------------------------------
+  // Parse pose data
+  //--------------------------------------------------------
+  geometry_msgs::PoseStamped robot_pose_message{};
+  //--------------------------------------------------------
   // Parse joint states
   //--------------------------------------------------------
   sensor_msgs::JointState joint_state_message{};
@@ -170,10 +177,14 @@ void RWSStatePublisher::pollingTimerCallback(const ros::TimerEvent& event)
   {
     for (auto& unit : group.units)
     {
+      robot_pose_message.pose.position = unit.pose.state.position.position;
+      robot_pose_message.pose.orientation = unit.pose.state.position.orientation;
+      
       for (auto& joint : unit.joints)
       {
         joint_state_message.name.push_back(joint.name);
         joint_state_message.position.push_back(joint.state.position);
+        joint_state_message.velocity.push_back(joint.state.velocity);
       }
     }
   }
@@ -227,6 +238,9 @@ void RWSStatePublisher::pollingTimerCallback(const ros::TimerEvent& event)
   // Publish the messages
   //--------------------------------------------------------
   auto time_now{ ros::Time::now() };
+
+  robot_pose_message.header.stamp = time_now;
+  robot_pose_publisher_.publish(robot_pose_message);
 
   joint_state_message.header.stamp = time_now;
   joint_state_publisher_.publish(joint_state_message);

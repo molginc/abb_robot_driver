@@ -162,6 +162,11 @@ private:
    * Note: Only used if the Add-In is present in the system.
    */
   ros::Publisher sm_runtime_state_publisher_;
+
+  /**
+   * \brief Publisher for robot cartesian pose  
+   */
+  ros::Publisher robot_pose_publisher_;
 };
 
 }
