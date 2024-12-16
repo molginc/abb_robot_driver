@@ -177,6 +177,17 @@ void RWSStatePublisher::pollingTimerCallback(const ros::TimerEvent& event)
   {
     for (auto& unit : group.units)
     {
+      // ROS_WARN_STREAM_THROTTLE_NAMED(THROTTLE_TIME, ROS_LOG_INIT,
+      //              "Trying to get pose for unit: "
+      //              << "Position: ["
+      //              << unit.pose.state.position.position.x << ", "
+      //              << unit.pose.state.position.position.y << ", "
+      //              << unit.pose.state.position.position.z << "], "
+      //              << "Orientation: ["
+      //              << unit.pose.state.position.orientation.x << ", "
+      //              << unit.pose.state.position.orientation.y << ", "
+      //              << unit.pose.state.position.orientation.z << ", "
+      //              << unit.pose.state.position.orientation.w << "]");
       robot_pose_message.pose.position = unit.pose.state.position.position;
       robot_pose_message.pose.orientation = unit.pose.state.position.orientation;
       
