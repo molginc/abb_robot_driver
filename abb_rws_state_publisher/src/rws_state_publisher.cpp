@@ -129,7 +129,6 @@ RWSStatePublisher::RWSStatePublisher(ros::NodeHandle& nh_params, ros::NodeHandle
   //--------------------------------------------------------
   joint_state_publisher_ = nh_msgs.advertise<sensor_msgs::JointState>("joint_states", 1);
   system_state_publisher_ = nh_msgs.advertise<abb_robot_msgs::SystemState>("system_states", 1);
-  // TEST PUBLISHER FOR ROBOT POSE 
   robot_pose_publisher_ = nh_msgs.advertise<geometry_msgs::PoseStamped>("robot_pose", 1);
 
   if (utilities::verifyStateMachineAddInPresence(robot_controller_description_.system_indicators()))
