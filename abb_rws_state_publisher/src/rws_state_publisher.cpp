@@ -158,8 +158,9 @@ void RWSStatePublisher::pollingTimerCallback(const ros::TimerEvent& event)
   catch (const std::runtime_error& exception)
   {
     ROS_WARN_STREAM_THROTTLE_NAMED(THROTTLE_TIME, ROS_LOG_INIT,
-                                   "Periodic polling of runtime data via RWS failed with '"
-                                       << exception.what() << "' (will try again later)");
+                     "Periodic polling of runtime data via RWS failed with '"
+                       << exception.what() << "' (will try again later)" << " Exception traceback: " << boost::diagnostic_information(exception));
+
   }
 
   //--------------------------------------------------------
