@@ -100,6 +100,9 @@ RobotControllerDescription establishRWSConnection(RWSManager& rws_manager,
         ROS_WARN_STREAM_NAMED(ROS_LOG_INIT, RWS_CONNECTION_ERROR_MESSAGE << " (waiting indefinitely), reason: '" <<
                                             exception.what() << "'");
       }
+      ROS_ERROR_STREAM_NAMED(ROS_LOG_INIT, "Exception details: " << exception.what());
+      ROS_ERROR_STREAM_NAMED(ROS_LOG_INIT, "Traceback: '" << boost::current_exception_diagnostic_information() << "'");
+
       reconnection_wait_time.sleep();
     }
   }

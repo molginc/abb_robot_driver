@@ -6,8 +6,10 @@
   <arg name="no_connection_timeout" default="false" doc="Specifies whether the node is allowed to wait indefinitely for the robot controller during initialization"/>
   <arg name="polling_rate"          default="5"     doc="The frequency [Hz] at which the controller state is collected"/>
   <arg name="output"                default="log"   doc="Specifies where the stdout/stderr streams are directed (i.e. 'log' or 'screen')"/>
+  <arg name="required"              default="true"   doc="Specifies whether the node is required to run (i.e. if it should be started even if the robot controller is not available)"/> 
+  <arg name="respawn"               default="false"  doc="Specifies whether the node should be respawned if it crashes or is killed (i.e. 'true' or 'false')"/>
 
-  <node pkg="abb_rws_state_publisher" type="rws_state_publisher" name="rws_state_publisher" output="$(arg output)">
+  <node pkg="abb_rws_state_publisher" type="rws_state_publisher" name="rws_state_publisher" output="$(arg output)" required="$(arg required)" respawn="$(arg respawn)">
     <param name="robot_ip" value="$(arg robot_ip)"/>
     <param name="robot_port" value="$(arg robot_port)"/>
     <param name="robot_nickname" value="$(arg robot_nickname)"/>

@@ -79,6 +79,7 @@ int main(int argc, char** argv)
   catch(const std::runtime_error& exception)
   {
     ROS_FATAL_STREAM_NAMED(ROS_LOG_MAIN, "Runtime error: '" << exception.what() << "'");
+    ROS_FATAL_STREAM_NAMED(ROS_LOG_MAIN, "Traceback: '" << boost::current_exception_diagnostic_information() << "'");
     return EXIT_FAILURE;
   }
   catch(const std::exception& exception)
