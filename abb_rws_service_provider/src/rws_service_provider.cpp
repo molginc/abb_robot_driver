@@ -247,7 +247,7 @@ void RWSServiceProvider::keepaliveCallback(const ros::TimerEvent& /*event*/)
   catch (const std::exception& e)
   {
     ROS_WARN_STREAM_THROTTLE_NAMED(
-        60.0, "init",
+        60.0, "keepalive",
         "RWS keep-alive ping failed (will retry in 30s): " << e.what());
   }
 }
