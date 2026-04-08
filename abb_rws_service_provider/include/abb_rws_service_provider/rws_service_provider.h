@@ -167,6 +167,15 @@ namespace abb
       void smAddInRuntimeStatesCallback(const abb_rapid_sm_addin_msgs::RuntimeState::ConstPtr &message);
 
       /**
+       * \brief Periodic keep-alive callback. Fires a cheap RWS GET via
+       *        the lower-priority interface (try-lock) so the controller's
+       *        5-minute inactivity reaper doesn't kill our session
+       *        between operator service calls. See RMF-315 and ABB RWS
+       *        docs ("recommended 30 seconds" HTTPS keep-alive interval).
+       */
+      void keepaliveCallback(const ros::TimerEvent& event);
+
+      /**
    * \brief Gets the contents of a file.
    *
    * The file must be located in the robot controller's home directory.
@@ -687,6 +696,11 @@ namespace abb
    * \brief Subscriber for RobotWare StateMachine Add-In runtime states.
    */
       ros::Subscriber sm_runtime_states_subscriber_;
+
+      /**
+       * \brief Periodic timer that issues an RWS keep-alive request. RMF-315.
+       */
+      ros::Timer keepalive_timer_;
 
       /**
    * \brief List of provided ROS services.
