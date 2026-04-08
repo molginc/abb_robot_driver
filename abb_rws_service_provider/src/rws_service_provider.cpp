@@ -205,6 +205,14 @@ RWSServiceProvider::RWSServiceProvider(ros::NodeHandle& nh_params, ros::NodeHand
   }
   // }
 
+  //--------------------------------------------------------
+  // Schedule a 30s RWS keep-alive (RMF-315). ABB documents
+  // a 5-minute inactivity timeout on the controller side and
+  // recommends a 30s keep-alive interval for HTTPS clients.
+  //--------------------------------------------------------
+  keepalive_timer_ =
+      nh_srvs.createTimer(ros::Duration(30.0), &RWSServiceProvider::keepaliveCallback, this);
+
   ROS_INFO_NAMED(ROS_LOG_INIT, "Initialization succeeded, and the node is ready for use");
 }
 
@@ -220,6 +228,28 @@ void RWSServiceProvider::systemStatesCallback(const abb_robot_msgs::SystemState:
 void RWSServiceProvider::smAddInRuntimeStatesCallback(const abb_rapid_sm_addin_msgs::RuntimeState::ConstPtr& message)
 {
   sm_addin_runtime_state_ = *message;
+}
+
+void RWSServiceProvider::keepaliveCallback(const ros::TimerEvent& /*event*/)
+{
+  // Try-lock via runService: if a real ROS service call is currently
+  // holding the interface mutex, that call IS the keep-alive — skip
+  // this tick. Catch & swallow any exception so a transient network
+  // hiccup never crashes the node.
+  try
+  {
+    rws_manager_.runService([](rws::v2_0::RWSStateMachineInterface& iface) {
+      // getSystemInfo() is the cheapest documented GET and is the same
+      // call collectAndUpdateRuntimeData() makes on every poll.
+      (void)iface.getSystemInfo();
+    });
+  }
+  catch (const std::exception& e)
+  {
+    ROS_WARN_STREAM_THROTTLE_NAMED(
+        60.0, "keepalive",
+        "RWS keep-alive ping failed (will retry in 30s): " << e.what());
+  }
 }
 
 bool RWSServiceProvider::getRCDescription(GetRCDescription::Request&, GetRCDescription::Response& response)
