@@ -42,6 +42,8 @@
 #include <abb_egm_rws_managers/rws_manager.h>
 #include <abb_egm_rws_managers/system_data_parser.h>
 
+#include <abb_rws_state_publisher/poll_guard.h>
+
 namespace abb
 {
 namespace robot
@@ -112,6 +114,11 @@ private:
   void pollingTimerCallback(const ros::TimerEvent&);
 
   /**
+   * \brief Builds and publishes ROS messages from the most recently collected system states.
+   */
+  void buildAndPublishMessages();
+
+  /**
    * \brief Handler for gathering required ROS parameters.
    */
   ParameterHandler parameters_;
@@ -145,6 +152,16 @@ private:
    * \brief Timer for polling and publishing of system states.
    */
   ros::Timer polling_timer_;
+
+  /**
+   * \brief Exception barrier for the RWS polling step.
+   */
+  PollGuard poll_guard_;
+
+  /**
+   * \brief Exception barrier for the message building/publishing step.
+   */
+  PollGuard publish_guard_;
 
   /**
    * \brief Publisher for joint states.

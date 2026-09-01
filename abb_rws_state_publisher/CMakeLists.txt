@@ -139,6 +139,14 @@ set_target_properties(${target_name}_exe
 )
 
 #===========================================================
+# Testing
+#===========================================================
+if(CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(${PROJECT_NAME}-test test/poll_guard_test.cpp)
+  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} gtest_main)
+endif()
+
+#===========================================================
 # Install
 #===========================================================
 install(
