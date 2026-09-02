@@ -151,18 +151,31 @@ void RWSStatePublisher::pollingTimerCallback(const ros::TimerEvent& event)
 {
   (void)event;
 
-  try
+  // No exception may escape this callback: it unwinds ros::spin() and
+  // terminates the node, tearing down the whole launch when the node is
+  // marked required. The RWS calls throw more than std::runtime_error —
+  // Poco transport/XML-parse exceptions and std::logic_error included —
+  // so both steps run behind a catch-everything guard. On a failed poll
+  // the last successfully collected state is published, matching the
+  // long-standing behavior for caught runtime errors.
+  if (!poll_guard_.run([this] { rws_manager_.collectAndUpdateRuntimeData(system_state_data_, motion_data_); }))
   {
-    rws_manager_.collectAndUpdateRuntimeData(system_state_data_, motion_data_);
+    ROS_WARN_STREAM_THROTTLE_NAMED(THROTTLE_TIME, ROS_LOG_PUBLISHER,
+                                   "Periodic polling of runtime data via RWS failed with '"
+                                       << poll_guard_.lastError() << "' (" << poll_guard_.consecutiveFailures()
+                                       << " consecutive failures; will try again later)");
   }
-  catch (const std::runtime_error& exception)
+
+  if (!publish_guard_.run([this] { buildAndPublishMessages(); }))
   {
-    ROS_WARN_STREAM_THROTTLE_NAMED(THROTTLE_TIME, ROS_LOG_INIT,
-                     "Periodic polling of runtime data via RWS failed with '"
-                       << exception.what() << "' (will try again later)" << " Exception traceback: " << boost::diagnostic_information(exception));
-
+    ROS_ERROR_STREAM_THROTTLE_NAMED(THROTTLE_TIME, ROS_LOG_PUBLISHER,
+                                    "Building/publishing system state messages failed with '"
+                                        << publish_guard_.lastError() << "' (will try again later)");
   }
+}
 
+void RWSStatePublisher::buildAndPublishMessages()
+{
   //--------------------------------------------------------
   // Parse joint states
   //--------------------------------------------------------
