@@ -3,6 +3,7 @@
 
 #include <Poco/Exception.h>
 
+#include <exception>
 #include <functional>
 #include <string>
 

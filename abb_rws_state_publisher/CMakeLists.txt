@@ -143,7 +143,10 @@ set_target_properties(${target_name}_exe
 #===========================================================
 if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(${PROJECT_NAME}-test test/poll_guard_test.cpp)
-  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} gtest_main)
+  # catkin_add_gtest creates no target when GTest is absent.
+  if(TARGET ${PROJECT_NAME}-test)
+    target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} gtest_main)
+  endif()
 endif()
 
 #===========================================================

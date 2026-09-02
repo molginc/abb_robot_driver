@@ -5,6 +5,7 @@
 #include <Poco/SAX/SAXException.h>
 
 #include <stdexcept>
+#include <string>
 
 namespace abb
 {
