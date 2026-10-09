@@ -129,6 +129,7 @@ RWSServiceProvider::RWSServiceProvider(ros::NodeHandle& nh_params, ros::NodeHand
   // Advertise core services
   //--------------------------------------------------------
   ROS_DEBUG_STREAM_NAMED(ROS_LOG_INIT, "Adding basic services");
+  services_.push_back(nh_srvs.advertiseService("get_ext_motion_data", &RWSServiceProvider::getExtMotionData, this));
   services_.push_back(nh_srvs.advertiseService("get_file_contents", &RWSServiceProvider::getFileContents, this));
   services_.push_back(nh_srvs.advertiseService("get_io_signal", &RWSServiceProvider::getIOSignal, this));
   services_.push_back(nh_srvs.advertiseService("get_rapid_bool", &RWSServiceProvider::getRAPIDBool, this));

@@ -60,6 +60,43 @@ namespace robot
  * Auxiliary methods (Core RWS services)
  */
 
+bool RWSServiceProvider::getExtMotionData(GetExtMotionData::Request&, GetExtMotionData::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Read the 'EXT_MOTION_DATA' instances from the robot controller's motion (MOC) configuration.
+    try
+    {
+      for (const auto& instance : interface.getCFGExtMotionData())
+      {
+        abb_rws_cfg_msgs::ExtMotionData ext_motion_data;
+        ext_motion_data.name = instance.name;
+        ext_motion_data.level = instance.level;
+        ext_motion_data.ramp_time = instance.ramp_time;
+        ext_motion_data.kp = instance.kp;
+        ext_motion_data.filter_bandwidth = instance.filter_bandwidth;
+        response.instances.push_back(ext_motion_data);
+      }
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& exception)
+    {
+      response.message = exception.what();
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+    }
+  });
+
+  return true;
+}
+
 bool RWSServiceProvider::getFileContents(GetFileContents::Request& request, GetFileContents::Response& response)
 {
   //--------------------------

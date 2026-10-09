@@ -43,6 +43,7 @@ find_package(catkin REQUIRED
     abb_rapid_sm_addin_msgs
     abb_robot_cpp_utilities
     abb_robot_msgs
+    abb_rws_cfg_msgs
     roscpp
 )
 
@@ -58,6 +59,7 @@ catkin_package(
     abb_rapid_sm_addin_msgs
     abb_robot_cpp_utilities
     abb_robot_msgs
+    abb_rws_cfg_msgs
     roscpp
   DEPENDS
     abb_egm_rws_managers
