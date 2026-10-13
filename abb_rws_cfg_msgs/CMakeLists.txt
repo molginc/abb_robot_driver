@@ -15,6 +15,7 @@ add_message_files(
 add_service_files(
   FILES
     GetExtMotionData.srv
+    SetExtMotionData.srv
 )
 
 generate_messages()

@@ -139,6 +139,7 @@ RWSServiceProvider::RWSServiceProvider(ros::NodeHandle& nh_params, ros::NodeHand
   services_.push_back(nh_srvs.advertiseService("get_rapid_symbol", &RWSServiceProvider::getRAPIDSymbol, this));
   services_.push_back(nh_srvs.advertiseService("get_speed_ratio", &RWSServiceProvider::getSpeedRatio, this));
   services_.push_back(nh_srvs.advertiseService("pp_to_main", &RWSServiceProvider::ppToMain, this));
+  services_.push_back(nh_srvs.advertiseService("set_ext_motion_data", &RWSServiceProvider::setExtMotionData, this));
   services_.push_back(nh_srvs.advertiseService("set_file_contents", &RWSServiceProvider::setFileContents, this));
   services_.push_back(nh_srvs.advertiseService("set_io_signal", &RWSServiceProvider::setIOSignal,
                                                this));  // FIXME: New Functions for different Signal Types

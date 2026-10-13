@@ -1,0 +1,36 @@
+#-------------------------------------------------------------------------------
+# Description:
+#   The purpose of this service definition, is to define a way to set the level
+#   and the proportional position gain (kp) of one 'External Motion Interface
+#   Data' instance (EGM configuration) in an ABB robot controller system.
+#
+# Note:
+#   The controller's motion configuration (MOC) stores the values, so they
+#   persist. The system parameters manual states that changed motion
+#   parameters take effect only after a controller restart; the EGM manual
+#   exempts the level.
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Service request fields
+#-------------------------------------------------------------------------------
+# Instance name (the 'ExtConfigName' argument of the EGMSetupXX RAPID instructions).
+string name
+
+# New level (0 = raw, 1 = filtering), or -1 to leave the level unchanged.
+int32 level
+
+# New proportional position gain (0 to 20), or NaN to leave kp unchanged.
+float64 kp
+
+---
+
+#-------------------------------------------------------------------------------
+# Service response fields
+#-------------------------------------------------------------------------------
+# Service success/failure indicator.
+# Refer to 'abb_robot_msgs/ServiceResponses' for defined error codes.
+uint16 result_code
+
+# Status message (empty if service succeeded).
+string message
