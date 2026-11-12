@@ -68,6 +68,9 @@
 #include <abb_rapid_sm_addin_msgs/SetRAPIDRoutine.h>
 #include <abb_rapid_sm_addin_msgs/SetSGCommand.h>
 
+#include <abb_rws_cfg_msgs/GetExtMotionData.h>
+#include <abb_rws_cfg_msgs/SetExtMotionData.h>
+
 namespace abb
 {
   namespace robot
@@ -90,6 +93,8 @@ namespace abb
       RWSServiceProvider(ros::NodeHandle &nh_params, ros::NodeHandle &nh_srvs);
 
     private:
+      using GetExtMotionData = abb_rws_cfg_msgs::GetExtMotionData;
+      using SetExtMotionData = abb_rws_cfg_msgs::SetExtMotionData;
       using GetFileContents = abb_robot_msgs::GetFileContents;
       using GetIOSignal = abb_robot_msgs::GetIOSignal;
       using GetRAPIDBool = abb_robot_msgs::GetRAPIDBool;
@@ -174,6 +179,26 @@ namespace abb
        *        docs ("recommended 30 seconds" HTTPS keep-alive interval).
        */
       void keepaliveCallback(const ros::TimerEvent& event);
+
+      /**
+   * \brief Gets all External Motion Interface Data instances (EGM configurations, incl. the position gain).
+   *
+   * \param request to process.
+   * \param response for containing the result.
+   *
+   * \return bool true if the request was processed.
+   */
+      bool getExtMotionData(GetExtMotionData::Request &request, GetExtMotionData::Response &response);
+
+      /**
+   * \brief Sets the level and kp of one External Motion Interface Data instance (EGM configuration).
+   *
+   * \param request to process.
+   * \param response for containing the result.
+   *
+   * \return bool true if the request was processed.
+   */
+      bool setExtMotionData(SetExtMotionData::Request &request, SetExtMotionData::Response &response);
 
       /**
    * \brief Gets the contents of a file.

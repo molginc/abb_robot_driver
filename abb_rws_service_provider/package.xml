@@ -22,5 +22,6 @@
   <depend>abb_rapid_sm_addin_msgs</depend>
   <depend>abb_robot_cpp_utilities</depend>
   <depend>abb_robot_msgs</depend>
+  <depend>abb_rws_cfg_msgs</depend>
   <depend>roscpp</depend>
 </package>

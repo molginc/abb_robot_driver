@@ -34,6 +34,7 @@
  ***********************************************************************************************************************
  */
 
+#include <cmath>
 #include <stdexcept>
 
 #include <abb_robot_msgs/ServiceResponses.h>
@@ -46,6 +47,10 @@ namespace
  * \brief Name for ROS logging in the 'services' context.
  */
 constexpr char ROS_LOG_SERVICES[]{ "services" };
+
+// Allowed External Motion Interface Data kp [EGM manual 3HAC073318 §4.1.7]
+constexpr double EXT_MOTION_KP_MIN{ 0.0 };
+constexpr double EXT_MOTION_KP_MAX{ 20.0 };
 }  // namespace
 
 namespace abb
@@ -59,6 +64,84 @@ namespace robot
 /***********************************************************
  * Auxiliary methods (Core RWS services)
  */
+
+bool RWSServiceProvider::getExtMotionData(GetExtMotionData::Request&, GetExtMotionData::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Read the 'EXT_MOTION_DATA' instances from the robot controller's motion (MOC) configuration.
+    try
+    {
+      for (const auto& instance : interface.getCFGExtMotionData())
+      {
+        abb_rws_cfg_msgs::ExtMotionData ext_motion_data;
+        ext_motion_data.name = instance.name;
+        ext_motion_data.level = instance.level;
+        ext_motion_data.ramp_time = instance.ramp_time;
+        ext_motion_data.kp = instance.kp;
+        ext_motion_data.filter_bandwidth = instance.filter_bandwidth;
+        response.instances.push_back(ext_motion_data);
+      }
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& exception)
+    {
+      response.message = exception.what();
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+    }
+  });
+
+  return true;
+}
+
+bool RWSServiceProvider::setExtMotionData(SetExtMotionData::Request& request, SetExtMotionData::Response& response)
+{
+  //--------------------------
+  // Verification
+  //--------------------------
+  // Reject an empty name, a level other than -1 (unchanged), 0 (raw) or 1 (filtering), a kp outside
+  // [EXT_MOTION_KP_MIN, EXT_MOTION_KP_MAX], and a request that changes nothing.
+  bool const level_unchanged = request.level == -1;
+  bool const level_valid = level_unchanged || request.level == 0 || request.level == 1;
+  bool const kp_unchanged = std::isnan(request.kp);
+  bool const kp_valid = kp_unchanged || (request.kp >= EXT_MOTION_KP_MIN && request.kp <= EXT_MOTION_KP_MAX);
+  if (request.name.empty() || !level_valid || !kp_valid || (level_unchanged && kp_unchanged))
+  {
+    response.message = "Invalid request: name must be set, level must be -1, 0 or 1, kp must be NaN or in [0, 20], "
+                       "and at least one of level and kp must change";
+    response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+    return true;
+  }
+  if (!verifyRWSManagerReady(response.result_code, response.message))
+    return true;
+
+  //--------------------------
+  // Run service
+  //--------------------------
+  rws_manager_.runService([&](rws::v2_0::RWSStateMachineInterface& interface) {
+    // Write the level and kp to the 'EXT_MOTION_DATA' instance in the robot controller's motion (MOC) configuration.
+    try
+    {
+      interface.setCFGExtMotionData(request.name, request.level, request.kp);
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_SUCCESS;
+    }
+    catch (const std::runtime_error& exception)
+    {
+      response.message = exception.what();
+      response.result_code = abb_robot_msgs::ServiceResponses::RC_FAILED;
+    }
+  });
+
+  return true;
+}
 
 bool RWSServiceProvider::getFileContents(GetFileContents::Request& request, GetFileContents::Response& response)
 {
