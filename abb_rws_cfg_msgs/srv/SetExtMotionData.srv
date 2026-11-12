@@ -6,9 +6,7 @@
 #
 # Note:
 #   The controller's motion configuration (MOC) stores the values, so they
-#   persist. The system parameters manual states that changed motion
-#   parameters take effect only after a controller restart; the EGM manual
-#   exempts the level.
+#   persist.
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
